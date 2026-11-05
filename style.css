@@ -276,7 +276,7 @@ a.btn { text-decoration: none; }
   align-items: center;
   justify-content: center;
   gap: 26px;
-  animation: splash-out 500ms ease 2800ms forwards;
+  animation: splash-out 500ms ease 3100ms forwards;
 }
 .splash-figs { opacity: 0; animation: figs-in 400ms ease 50ms forwards; }
 .splash-ring {
@@ -290,12 +290,14 @@ a.btn { text-decoration: none; }
   direction: ltr;
   color: #FFFFFF;
   font-family: var(--font);
-  font-size: 40px;
-  font-weight: 800;
-  letter-spacing: 1.5px;
+  font-size: 44px;
+  font-weight: 900;
+  letter-spacing: 0;
   opacity: 0;
   transform: translateY(8px);
-  animation: rise-in 500ms ease 1550ms forwards;
+  animation:
+    rise-in 450ms ease 1500ms forwards,
+    word-slim 1000ms cubic-bezier(.65, 0, .35, 1) 1850ms forwards;
 }
 .splash-word .wm-b { color: #FFB59C; }
 .splash-tag {
@@ -310,11 +312,13 @@ a.btn { text-decoration: none; }
 @keyframes figs-in { to { opacity: 1; } }
 @keyframes ring-draw { to { stroke-dashoffset: 0; } }
 @keyframes rise-in { to { opacity: 1; transform: translateY(0); } }
+@keyframes word-slim { from { font-weight: 900; letter-spacing: 0; } to { font-weight: 300; letter-spacing: 3px; } }
 @keyframes splash-out { to { opacity: 0; visibility: hidden; } }
 
 @media (prefers-reduced-motion: reduce) {
   #splash { animation: splash-out 200ms ease 700ms forwards; }
   .splash-figs, .splash-word, .splash-tag { animation: none; opacity: 1; transform: none; }
+  .splash-word { font-weight: 300; letter-spacing: 3px; }
   .splash-ring { animation: none; stroke-dashoffset: 0; }
 }
 
