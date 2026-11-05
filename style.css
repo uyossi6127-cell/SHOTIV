@@ -214,6 +214,33 @@ a.btn { text-decoration: none; }
 .history li { display: flex; justify-content: space-between; font-size: 15px; border-bottom: 1px solid #E4E8E2; padding-bottom: 8px; }
 .history li:last-child { border-bottom: 0; padding-bottom: 0; }
 
+.last-shot {
+  color: #FFFFFF;
+  font-size: 15px;
+  text-align: center;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shot-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.shot-list li {
+  background: var(--surface);
+  border-radius: 18px;
+  padding: 14px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.shot-list .when { display: flex; flex-direction: column; }
+.shot-list .when strong { font-size: 17px; }
+.shot-list .when span, .shot-list .site { font-size: 14px; color: var(--muted); }
+.shot-list .dose { font-weight: 800; font-size: 17px; white-space: nowrap; }
+
 @media (prefers-reduced-motion: reduce) {
   .progress-fill { transition: none; }
   .btn:active { transform: none; }

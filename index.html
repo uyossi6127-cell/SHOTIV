@@ -86,6 +86,7 @@
         <p class="countdown"><strong data-days></strong> <span data-days-word></span></p>
         <p data-shot-meta></p>
         <button class="btn light" type="button" data-action="log-shot">רשום זריקה</button>
+        <a class="last-shot" href="#history" data-last-shot hidden></a>
       </article>
 
       <article class="card reminder" data-reminder-card hidden>
@@ -159,6 +160,19 @@
       <div class="spacer"></div>
       <button class="btn primary" type="submit">שמור זריקה</button>
     </form>
+  </template>
+
+  <!-- היסטוריית זריקות (S14) -->
+  <template id="tpl-history">
+    <section class="screen history-screen">
+      <header class="row-between">
+        <h1>היסטוריית זריקות</h1>
+        <a class="btn ghost small" href="#home">חזרה</a>
+      </header>
+      <p class="muted" data-history-summary></p>
+      <ul class="shot-list" data-shot-list></ul>
+      <p class="note" data-history-empty hidden>עדיין לא נרשמו זריקות.</p>
+    </section>
   </template>
 
   <!-- שינוי מינון (S8) -->

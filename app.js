@@ -140,6 +140,13 @@ function renderHome(data) {
 
   const logBtn = $('[data-action="log-shot"]');
   const lastShot = data.shots[data.shots.length - 1];
+
+  // הזריקה האחרונה (S14)
+  if (lastShot) {
+    const lastEl = $('[data-last-shot]');
+    lastEl.hidden = false;
+    lastEl.textContent = `הזריקה האחרונה: ${relativeDay(lastShot.date)}${lastShot.site ? ' · ' + lastShot.site : ''}`;
+  }
   const loggedToday = lastShot && daysUntil(lastShot.date) === 0;
   if (loggedToday) {
     // כבר נרשמה זריקה היום: לא מאפשרים רישום כפול, אבל מאפשרים לבטל טעות.
@@ -283,6 +290,50 @@ function showError(el, message) {
   el.hidden = false;
 }
 
+// ---------- היסטוריית זריקות (S14) ----------
+function relativeDay(date) {
+  const ago = -daysUntil(date);
+  const d = new Date(date);
+  const label = `יום ${DAY_NAMES[d.getDay()]}, ${d.toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric' })}`;
+  if (ago === 0) return 'היום';
+  if (ago === 1) return 'אתמול';
+  return `${label} (לפני ${ago} ימים)`;
+}
+
+function renderHistory(data) {
+  mount('tpl-history');
+  const $ = (sel) => app.querySelector(sel);
+  const list = $('[data-shot-list]');
+
+  if (data.shots.length === 0) {
+    $('[data-history-empty]').hidden = false;
+    return;
+  }
+
+  const n = data.shots.length;
+  $('[data-history-summary]').textContent = n === 1 ? 'נרשמה זריקה אחת.' : `נרשמו ${n} זריקות.`;
+
+  [...data.shots].reverse().forEach((shot) => {
+    const d = new Date(shot.date);
+    const li = document.createElement('li');
+
+    const when = document.createElement('div');
+    when.className = 'when';
+    const day = document.createElement('strong');
+    day.textContent = d.toLocaleDateString('he-IL', { weekday: 'long', day: 'numeric', month: 'long' });
+    const site = document.createElement('span');
+    site.textContent = shot.site || 'אזור לא נרשם';
+    when.append(day, site);
+
+    const dose = document.createElement('span');
+    dose.className = 'dose';
+    dose.textContent = `${formatKg(shot.dose)} מ"ג`;
+
+    li.append(when, dose);
+    list.appendChild(li);
+  });
+}
+
 // ---------- שינוי מינון (S8) ----------
 function renderDose(data) {
   mount('tpl-dose');
@@ -372,6 +423,7 @@ function render() {
   const route = location.hash.replace('#', '');
   if (route === 'log') return renderLog(data);
   if (route === 'dose') return renderDose(data);
+  if (route === 'history') return renderHistory(data);
   renderHome(data);
   window.scrollTo(0, 0);
 }
