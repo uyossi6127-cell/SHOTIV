@@ -519,10 +519,8 @@ if (splash) {
   splash.addEventListener('click', removeSplash);
   setTimeout(removeSplash, 5200);
   // מי שביקש פחות תנועה בטלפון רואה ישר את המצב הסופי של הדמויות.
-  const art = splash.querySelector('.splash-art');
-  if (art && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    art.pauseAnimations();
-    art.setCurrentTime(3);
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    splash.querySelectorAll('svg').forEach((svg) => { svg.pauseAnimations(); svg.setCurrentTime(3); });
   }
 }
 

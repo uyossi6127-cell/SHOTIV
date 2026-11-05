@@ -278,7 +278,29 @@ a.btn { text-decoration: none; }
   gap: 26px;
   animation: splash-out 600ms ease 4100ms forwards;
 }
-.splash-figs { opacity: 0; animation: figs-in 400ms ease 50ms forwards; }
+.splash-stage { position: relative; width: 260px; height: 260px; }
+.splash-art { position: absolute; inset: 0; }
+.fig3d {
+  position: absolute;
+  top: 24px;
+  opacity: 0;
+  transform-origin: 50% 90%;
+  animation:
+    figs-in 450ms ease 50ms forwards,
+    turn3d 3.4s ease-in-out 0s infinite alternate;
+}
+.fig3d.woman { left: 40px; }
+.fig3d.man { left: 133px; animation-delay: 170ms, -1.7s; }
+.fig-svg { display: block; overflow: visible; animation: breathe 2.6s ease-in-out infinite; }
+.man .fig-svg { animation-delay: -1.3s; }
+@keyframes turn3d {
+  from { transform: perspective(520px) rotateY(-20deg); }
+  to   { transform: perspective(520px) rotateY(20deg); }
+}
+@keyframes breathe {
+  0%, 100% { transform: translateY(0) scaleY(1); }
+  50%      { transform: translateY(-4px) scaleY(1.012); }
+}
 .splash-ring {
   stroke-dasharray: 867;
   stroke-dashoffset: 867;
@@ -317,7 +339,7 @@ a.btn { text-decoration: none; }
 
 @media (prefers-reduced-motion: reduce) {
   #splash { animation: splash-out 200ms ease 700ms forwards; }
-  .splash-figs, .splash-word, .splash-tag { animation: none; opacity: 1; transform: none; }
+  .fig3d, .fig-svg, .splash-word, .splash-tag { animation: none; opacity: 1; transform: none; }
   .splash-word { font-weight: 300; letter-spacing: 3px; }
   .splash-ring { animation: none; stroke-dashoffset: 0; }
 }
