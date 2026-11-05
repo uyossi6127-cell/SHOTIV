@@ -138,13 +138,28 @@ function renderHome(data) {
 
   $('[data-motivation]').textContent = motivation(data, pct);
 
-  $('[data-action="log-shot"]').addEventListener('click', () => {
-    // גרסה ראשונית: רישום זריקה של היום במינון הנוכחי. המסך המלא יגיע בספרינט 2 (S3).
-    data.shots.push({ date: new Date().toISOString(), dose: profile.dose, site: null });
-    saveData(data);
-    toast('הזריקה נרשמה');
-    renderHome(data);
-  });
+  const logBtn = $('[data-action="log-shot"]');
+  const lastShot = data.shots[data.shots.length - 1];
+  const loggedToday = lastShot && daysUntil(lastShot.date) === 0;
+  if (loggedToday) {
+    // כבר נרשמה זריקה היום: לא מאפשרים רישום כפול, אבל מאפשרים לבטל טעות.
+    logBtn.textContent = 'ביטול הרישום של היום';
+    logBtn.addEventListener('click', () => {
+      if (!window.confirm('לבטל את הזריקה שנרשמה היום?')) return;
+      data.shots.pop();
+      saveData(data);
+      toast('הרישום בוטל');
+      renderHome(data);
+    });
+  } else {
+    logBtn.addEventListener('click', () => {
+      // גרסה ראשונית: רישום זריקה של היום במינון הנוכחי. המסך המלא יגיע בספרינט 2 (S3).
+      data.shots.push({ date: new Date().toISOString(), dose: profile.dose, site: null });
+      saveData(data);
+      toast('הזריקה נרשמה');
+      renderHome(data);
+    });
+  }
 
   $('[data-action="reset"]').addEventListener('click', () => {
     if (window.confirm('למחוק את כל הנתונים ולהתחיל מחדש?')) {
@@ -171,8 +186,23 @@ function toast(message) {
   setTimeout(() => el.remove(), 2200);
 }
 
+// תיקון חד-פעמי לנתונים שנוצרו לפני התיקון: מוחק זריקות כפולות באותו יום.
+function dedupeShots(data) {
+  const seen = new Set();
+  const before = data.shots.length;
+  data.shots = data.shots.filter((s) => {
+    const key = startOfDay(s.date).getTime();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  if (data.shots.length !== before) saveData(data);
+  return data;
+}
+
 function render() {
-  const data = loadData();
+  const raw = loadData();
+  const data = raw && raw.profile ? dedupeShots(raw) : raw;
   if (data && data.profile) renderHome(data);
   else renderOnboarding();
 }
