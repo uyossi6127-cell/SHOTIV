@@ -175,12 +175,15 @@ function renderHome(data) {
     });
   }
 
-  $('[data-action="reset"]').addEventListener('click', () => {
-    if (window.confirm('למחוק את כל הנתונים ולהתחיל מחדש?')) {
-      localStorage.removeItem(STORAGE_KEY);
-      render();
-    }
-  });
+  // תזכורת לגבות (S15): אחרי שיש נתונים שחבל לאבד, ואם לא גיבו 30 יום.
+  const lastBackup = data.lastBackupAt ? new Date(data.lastBackupAt) : null;
+  const backupAge = lastBackup ? -daysUntil(lastBackup) : Infinity;
+  if (data.shots.length >= 2 && backupAge > 30) {
+    $('[data-backup-nudge]').hidden = false;
+    $('[data-backup-nudge-text]').textContent = lastBackup
+      ? `הגיבוי האחרון היה לפני ${backupAge} ימים.`
+      : 'עדיין לא גיבית. זה לוקח 10 שניות.';
+  }
 }
 
 function motivation(data, pct) {
@@ -334,6 +337,66 @@ function renderHistory(data) {
   });
 }
 
+// ---------- הגדרות וגיבוי (S15) ----------
+function renderSettings(data) {
+  mount('tpl-settings');
+  const $ = (sel) => app.querySelector(sel);
+
+  $('[data-last-backup]').textContent = data.lastBackupAt
+    ? `גיבוי אחרון: ${new Date(data.lastBackupAt).toLocaleDateString('he-IL')}`
+    : 'עדיין לא בוצע גיבוי.';
+
+  $('[data-action="backup"]').addEventListener('click', () => {
+    data.lastBackupAt = new Date().toISOString();
+    saveData(data);
+    const payload = JSON.stringify({ app: 'shotiv', exportedAt: data.lastBackupAt, data }, null, 2);
+    const blob = new Blob([payload], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `shotiv-backup-${toDateInput(new Date())}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    toast('קובץ הגיבוי נשמר. שלח אותו לעצמך.');
+    renderSettings(data);
+  });
+
+  const errorEl = $('[data-restore-error]');
+  $('[data-action="restore"]').addEventListener('change', async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+    try {
+      const parsed = JSON.parse(await file.text());
+      const restored = parsed && parsed.app === 'shotiv' ? parsed.data : null;
+      if (!restored || !restored.profile || !Array.isArray(restored.shots)) {
+        return showError(errorEl, 'זה לא קובץ גיבוי של Shotiv.');
+      }
+      restored.weights = Array.isArray(restored.weights) ? restored.weights : [];
+      const n = restored.shots.length;
+      const msg = `לשחזר גיבוי מ-${new Date(parsed.exportedAt).toLocaleDateString('he-IL')} עם ${n} זריקות? הנתונים הנוכחיים יוחלפו.`;
+      if (!window.confirm(msg)) return;
+      saveData(restored);
+      toast('הנתונים שוחזרו');
+      location.hash = '#home';
+      render();
+    } catch (err) {
+      showError(errorEl, 'לא הצלחנו לקרוא את הקובץ. ודא שזה קובץ הגיבוי ששמרת.');
+    }
+  });
+
+  $('[data-action="reset"]').addEventListener('click', () => {
+    const warn = data.lastBackupAt
+      ? 'למחוק את כל הנתונים? אי אפשר לבטל.'
+      : 'עדיין לא גיבית. כל הנתונים יימחקו לצמיתות. להמשיך?';
+    if (!window.confirm(warn)) return;
+    localStorage.removeItem(STORAGE_KEY);
+    location.hash = '';
+    render();
+  });
+}
+
 // ---------- שינוי מינון (S8) ----------
 function renderDose(data) {
   mount('tpl-dose');
@@ -424,6 +487,7 @@ function render() {
   if (route === 'log') return renderLog(data);
   if (route === 'dose') return renderDose(data);
   if (route === 'history') return renderHistory(data);
+  if (route === 'settings') return renderSettings(data);
   renderHome(data);
   window.scrollTo(0, 0);
 }

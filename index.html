@@ -78,7 +78,7 @@
           <span class="muted" data-greeting></span>
           <h1 class="wordmark">Shotiv</h1>
         </div>
-        <button class="btn ghost small" type="button" data-action="reset">איפוס</button>
+        <a class="btn ghost small" href="#settings">הגדרות</a>
       </header>
 
       <article class="card next-shot">
@@ -115,6 +115,11 @@
       </article>
 
       <p class="note" data-motivation></p>
+
+      <a class="backup-nudge" href="#settings" data-backup-nudge hidden>
+        <strong>כדאי לגבות את הנתונים</strong>
+        <span data-backup-nudge-text></span>
+      </a>
     </section>
   </template>
 
@@ -172,6 +177,38 @@
       <p class="muted" data-history-summary></p>
       <ul class="shot-list" data-shot-list></ul>
       <p class="note" data-history-empty hidden>עדיין לא נרשמו זריקות.</p>
+    </section>
+  </template>
+
+  <!-- הגדרות וגיבוי (S15) -->
+  <template id="tpl-settings">
+    <section class="screen settings">
+      <header class="row-between">
+        <h1>הגדרות</h1>
+        <a class="btn ghost small" href="#home">חזרה</a>
+      </header>
+
+      <article class="card">
+        <h2>גיבוי הנתונים</h2>
+        <p class="muted small-text">הנתונים שמורים רק בטלפון הזה. גבה אותם לקובץ ושמור אותו בוואטסאפ, במייל או ב-Drive. אם תחליף טלפון, תוכל לשחזר מהקובץ.</p>
+        <p class="small-text" data-last-backup></p>
+        <button class="btn primary" type="button" data-action="backup">גבה עכשיו</button>
+      </article>
+
+      <article class="card">
+        <h2>שחזור מגיבוי</h2>
+        <p class="muted small-text">טוען קובץ גיבוי ומחליף את הנתונים שבטלפון.</p>
+        <label class="btn outline file-btn">בחר קובץ גיבוי
+          <input type="file" accept=".json,application/json" data-action="restore">
+        </label>
+        <p class="error" data-restore-error role="alert" hidden></p>
+      </article>
+
+      <article class="card danger-zone">
+        <h2>מחיקת כל הנתונים</h2>
+        <p class="muted small-text">מוחק את כל הזריקות, המשקל וההגדרות מהטלפון. אי אפשר לבטל. מומלץ לגבות לפני.</p>
+        <button class="btn danger" type="button" data-action="reset">מחק הכל והתחל מחדש</button>
+      </article>
     </section>
   </template>
 
