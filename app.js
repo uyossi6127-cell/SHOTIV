@@ -343,6 +343,16 @@ function renderSettings(data) {
   mount('tpl-settings');
   const $ = (sel) => app.querySelector(sel);
 
+  // גודל טקסט (נשמר במכשיר, בנפרד מהנתונים)
+  const size = localStorage.getItem('shotiv.textSize') || 'normal';
+  app.querySelectorAll('input[name="textSize"]').forEach((r) => {
+    r.checked = r.value === size;
+    r.addEventListener('change', () => {
+      localStorage.setItem('shotiv.textSize', r.value);
+      applyTextSize();
+    });
+  });
+
   $('[data-last-backup]').textContent = data.lastBackupAt
     ? `גיבוי אחרון: ${new Date(data.lastBackupAt).toLocaleDateString('he-IL')}`
     : 'עדיין לא בוצע גיבוי.';
@@ -478,6 +488,11 @@ function downloadCalendar(data) {
   setTimeout(() => URL.revokeObjectURL(url), 5000);
   toast('פתח את הקובץ כדי להוסיף ליומן');
 }
+
+function applyTextSize() {
+  document.documentElement.classList.toggle('text-large', localStorage.getItem('shotiv.textSize') === 'large');
+}
+applyTextSize();
 
 // ---------- ניווט בין מסכים ----------
 function render() {

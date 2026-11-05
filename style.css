@@ -2,7 +2,7 @@
   --ground: #F7F6FB;
   --surface: #FFFFFF;
   --ink: #1B2B2A;
-  --muted: #4F5E5C;
+  --muted: #3E4A55;
   --line: #CDD3CC;
   --accent: #5B3FD9;          /* סגול: זריקות ופעולה ראשית */
   --accent-deep: #2E1F7A;
@@ -29,8 +29,8 @@ body {
   background: var(--ground);
   color: var(--ink);
   font-family: var(--font);
-  font-size: 16px;
-  line-height: 1.5;
+  font-size: 18px;
+  line-height: 1.55;
   -webkit-text-size-adjust: 100%;
 }
 
@@ -332,3 +332,30 @@ a.btn { text-decoration: none; }
 .next-shot { background: var(--accent); box-shadow: 0 10px 24px -14px rgba(91, 63, 217, .7); }
 .choice.suggested span::after { color: var(--coral); }
 .splash-word .wm-b { color: #FFB59C; }
+
+/* התאמה לגילאי 40–60: טקסט גדול יותר, כפתורים גדולים, ניגודיות חזקה */
+h1 { font-size: 30px; }
+h2 { font-size: 19px; }
+.small-text { font-size: 16px; }
+.field { font-size: 17px; }
+.field input, .field select { height: 56px; font-size: 19px; }
+.choice span { height: 56px; font-size: 18px; }
+.btn { min-height: 56px; font-size: 18px; }
+.btn.primary { min-height: 60px; font-size: 19px; }
+.btn.small { min-height: 48px; font-size: 16px; }
+.stats dt { font-size: 15px; }
+.stats dd { font-size: 27px; }
+.label-light { font-size: 17px; }
+.note { font-size: 17px; }
+.last-shot { font-size: 16px; }
+.toast { font-size: 17px; padding: 16px 18px; }
+.shot-list .when strong { font-size: 18px; }
+.shot-list .when span, .shot-list .site { font-size: 16px; }
+.history li { font-size: 17px; }
+.link-btn { font-size: 16px; }
+.backup-nudge { font-size: 17px; }
+.backup-nudge span { font-size: 16px; }
+
+/* אפשרות "טקסט גדול" בהגדרות */
+html.text-large #app { zoom: 1.15; }
+.segmented { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
