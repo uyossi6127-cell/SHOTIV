@@ -1,11 +1,11 @@
 // Service Worker: שומר את קבצי האפליקציה כדי שתעבוד גם בלי אינטרנט.
 // בכל שינוי בקבצים מעלים את מספר הגרסה, כדי שהטלפון יוריד את החדשים.
-const CACHE = 'shotiv-v24';
+const CACHE = 'shotiv-v25';
 const FILES = [
   './',
   'index.html',
-  'style.css',
-  'app.js',
+  'style.css?v=25',
+  'app.js?v=25',
   'manifest.webmanifest',
   'icons/icon-192.png',
   'icons/icon-512.png',
@@ -29,8 +29,10 @@ self.addEventListener('activate', (event) => {
 // קודם רשת, ואם אין חיבור – מהמטמון.
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  const sameOrigin = new URL(event.request.url).origin === self.location.origin;
+  // תמיד בודקים מול השרת אם יש גרסה חדשה (בלי להסתמך על מטמון הדפדפן)
   event.respondWith(
-    fetch(event.request)
+    fetch(event.request, sameOrigin ? { cache: 'no-cache' } : undefined)
       .then((response) => {
         if (response.ok && new URL(event.request.url).origin === self.location.origin) {
           const copy = response.clone();

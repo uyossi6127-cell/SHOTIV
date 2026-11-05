@@ -1,6 +1,7 @@
 'use strict';
 
 // ---------- שמירת נתונים (על המכשיר בלבד) ----------
+const APP_VERSION = '25';
 const STORAGE_KEY = 'shotiv.v1';
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
@@ -593,6 +594,7 @@ function renderSettings(data) {
     });
   });
 
+  $('[data-version]').textContent = `גרסה ${APP_VERSION}`;
   $('[data-last-backup]').textContent = data.lastBackupAt
     ? `גיבוי אחרון: ${new Date(data.lastBackupAt).toLocaleDateString('he-IL')}`
     : 'עדיין לא בוצע גיבוי.';
@@ -773,7 +775,18 @@ if (splash) {
 
 // ---------- התקנה כאפליקציה (S9) ----------
 if ('serviceWorker' in navigator) {
+  // כשגרסה חדשה נכנסת לפעולה, טוענים מחדש פעם אחת כדי להציג אותה מיד
+  // (לא בביקור הראשון, כדי לא לקטוע את ההרשמה)
+  const hadController = !!navigator.serviceWorker.controller;
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (reloaded || !hadController) return;
+    reloaded = true;
+    window.location.reload();
+  });
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
+      .then((reg) => reg.update())
+      .catch(() => {});
   });
 }
