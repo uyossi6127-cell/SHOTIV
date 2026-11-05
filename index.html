@@ -43,6 +43,14 @@
       </header>
 
       <fieldset class="field">
+        <legend>מגדר</legend>
+        <div class="choice-grid two">
+          <label class="choice"><input type="radio" name="gender" value="female" required><span>אישה</span></label>
+          <label class="choice"><input type="radio" name="gender" value="male"><span>גבר</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset class="field">
         <legend>סוג התרופה</legend>
         <div class="choice-grid three">
           <label class="choice"><input type="radio" name="med" value="מונג'רו" required><span>מונג'רו</span></label>
@@ -258,6 +266,15 @@
         <div class="segmented">
           <label class="choice"><input type="radio" name="textSize" value="normal"><span>רגיל</span></label>
           <label class="choice"><input type="radio" name="textSize" value="large"><span style="font-size: 21px">גדול</span></label>
+        </div>
+      </fieldset>
+
+      <fieldset class="card">
+        <legend class="sr-only">מגדר</legend>
+        <h2 aria-hidden="true">מגדר</h2>
+        <div class="segmented">
+          <label class="choice"><input type="radio" name="genderSetting" value="female"><span>אישה</span></label>
+          <label class="choice"><input type="radio" name="genderSetting" value="male"><span>גבר</span></label>
         </div>
       </fieldset>
 

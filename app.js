@@ -72,6 +72,7 @@ function renderOnboarding() {
     event.preventDefault();
     const f = new FormData(form);
     const profile = {
+      gender: f.get('gender'),
       med: f.get('med'),
       dose: Number(f.get('dose')),
       shotDay: Number(f.get('shotDay')),
@@ -94,6 +95,7 @@ function renderOnboarding() {
 }
 
 function validateProfile(p) {
+  if (!p.gender) return 'בחר מגדר.';
   if (!p.med) return 'בחר את סוג התרופה.';
   if (!(p.dose > 0)) return 'הזן את המינון שהרופא קבע.';
   if (!(p.startWeight >= 30 && p.startWeight <= 300)) return 'הזן משקל נוכחי בין 30 ל-300 ק"ג.';
@@ -353,6 +355,13 @@ function svgEl(tag, attrs) {
   return el;
 }
 
+function warnColor(data) {
+  const g = data.profile.gender;
+  if (g === 'female') return '#B86D72'; // זהב ורוד
+  if (g === 'male') return '#8C88A6';   // פנינה (גוון כסוף כדי שייראה על רקע לבן)
+  return '#E07A2E';
+}
+
 function buildChart(data) {
   const pts = weightPoints(data);
   const goal = data.profile.goalWeight;
@@ -390,7 +399,7 @@ function buildChart(data) {
     for (let i = 1; i < pts.length; i++) {
       const up = pts[i].kg > pts[i - 1].kg;
       svg.appendChild(svgEl('line', { x1: x(pts[i - 1].date), y1: y(pts[i - 1].kg), x2: x(pts[i].date), y2: y(pts[i].kg),
-        stroke: up ? '#E07A2E' : '#0E8A62', 'stroke-width': 3, 'stroke-linecap': 'round' }));
+        stroke: up ? warnColor(data) : '#0E8A62', 'stroke-width': 3, 'stroke-linecap': 'round' }));
     }
   }
   pts.forEach((p, i) => {
@@ -399,7 +408,7 @@ function buildChart(data) {
     const delta = prev ? Math.round((p.kg - prev.kg) * 10) / 10 : 0;
     if (delta > 0) {
       // סימן אזהרה: עיגול כתום עם סימן קריאה
-      svg.appendChild(svgEl('circle', { cx, cy, r: 9, fill: '#E07A2E', stroke: '#FFFFFF', 'stroke-width': 2 }));
+      svg.appendChild(svgEl('circle', { cx, cy, r: 9, fill: warnColor(data), stroke: '#FFFFFF', 'stroke-width': 2 }));
       svg.appendChild(svgEl('rect', { x: cx - 1.4, y: cy - 5.5, width: 2.8, height: 7, rx: 1.4, fill: '#FFFFFF' }));
       svg.appendChild(svgEl('circle', { cx, cy: cy + 4.2, r: 1.5, fill: '#FFFFFF' }));
     } else if (delta < 0) {
@@ -469,7 +478,8 @@ function showFeedback(data, justSaved) {
     text = 'יציבות היא גם התקדמות. ממשיכים בשגרה.';
   }
   box.hidden = false;
-  box.className = `feedback ${kind}`;
+  const g = data.profile.gender;
+  box.className = `feedback ${kind}${g ? ' g-' + g : ''}`;
   box.querySelector('[data-feedback-icon]').innerHTML = ICONS[kind];
   box.querySelector('[data-feedback-title]').textContent = title;
   box.querySelector('[data-feedback-text]').textContent = text;
@@ -558,6 +568,16 @@ function renderWeight(data, justSaved = false) {
 function renderSettings(data) {
   mount('tpl-settings');
   const $ = (sel) => app.querySelector(sel);
+
+  // מגדר (משפיע על צבע האזהרה)
+  app.querySelectorAll('input[name="genderSetting"]').forEach((r) => {
+    r.checked = r.value === data.profile.gender;
+    r.addEventListener('change', () => {
+      data.profile.gender = r.value;
+      saveData(data);
+      toast('נשמר');
+    });
+  });
 
   // גודל טקסט (נשמר במכשיר, בנפרד מהנתונים)
   const size = localStorage.getItem('shotiv.textSize') || 'normal';

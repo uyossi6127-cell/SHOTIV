@@ -435,3 +435,9 @@ html.text-large #app { zoom: 1.15; }
   .feedback.celebrate, .feedback.celebrate .feedback-icon, .feedback.warn-in, .spark { animation: none; }
   .spark { display: none; }
 }
+
+/* אזהרה בצבע לפי מגדר */
+.feedback.up.g-female { background: linear-gradient(135deg, #FDF1EE, #F8E2DC); color: #74343E; border-color: #E2B2A6; }
+.feedback.up.g-female .feedback-icon { background: linear-gradient(135deg, #D99A8E, #9C5862); }
+.feedback.up.g-male { background: linear-gradient(135deg, #FFFFFF, #F1ECF6 55%, #E7EEF4); color: #3A3556; border-color: #CFCADF; }
+.feedback.up.g-male .feedback-icon { background: linear-gradient(135deg, #B5B1C9, #7E7A9A); }
