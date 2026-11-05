@@ -1,11 +1,11 @@
 // Service Worker: שומר את קבצי האפליקציה כדי שתעבוד גם בלי אינטרנט.
 // בכל שינוי בקבצים מעלים את מספר הגרסה, כדי שהטלפון יוריד את החדשים.
-const CACHE = 'shotiv-v27';
+const CACHE = 'shotiv-v28';
 const FILES = [
   './',
   'index.html',
-  'style.css?v=27',
-  'app.js?v=27',
+  'style.css?v=28',
+  'app.js?v=28',
   'manifest.webmanifest',
   'icons/icon-192.png',
   'icons/icon-512.png',

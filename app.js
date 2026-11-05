@@ -1,7 +1,7 @@
 'use strict';
 
 // ---------- שמירת נתונים (על המכשיר בלבד) ----------
-const APP_VERSION = '27';
+const APP_VERSION = '28';
 const STORAGE_KEY = 'shotiv.v1';
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
@@ -379,69 +379,129 @@ function warnColor(data) {
 function buildChart(data) {
   const pts = weightPoints(data);
   const goal = data.profile.goalWeight;
-  const W = 340, H = 210, L = 38, R = 14, T = 16, B = 30;
+  const W = 340, H = 240, L = 34, R = 18, T = 40, B = 30;
   const t0 = new Date(pts[0].date).getTime();
   const t1 = Math.max(new Date(pts[pts.length - 1].date).getTime(), t0 + 7 * DAY_MS);
   const kgs = pts.map((p) => p.kg).concat(goal);
   const lo = Math.floor(Math.min(...kgs) - 1), hi = Math.ceil(Math.max(...kgs) + 1);
   const x = (d) => L + ((new Date(d).getTime() - t0) / (t1 - t0)) * (W - L - R);
   const y = (kg) => T + ((hi - kg) / (hi - lo)) * (H - T - B);
+  const P = pts.map((p) => ({ x: x(p.date), y: y(p.kg), kg: p.kg, date: p.date }));
+  const uid = 'c' + Math.random().toString(36).slice(2, 7);
 
-  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img',
+  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', class: 'wchart',
     'aria-label': `גרף משקל: מ-${formatKg(pts[0].kg)} ל-${formatKg(pts[pts.length - 1].kg)} קילו, יעד ${formatKg(goal)}` });
 
-  // קווי רקע ותוויות ציר
-  [hi, Math.round((hi + lo) / 2), lo].forEach((kg) => {
-    svg.appendChild(svgEl('line', { x1: L, x2: W - R, y1: y(kg), y2: y(kg), stroke: '#E6E4EE', 'stroke-width': 1 }));
-    const t = svgEl('text', { x: L - 6, y: y(kg) + 4, 'text-anchor': 'end', 'font-size': 12, fill: '#3E4A55' });
+  const defs = svgEl('defs', {});
+  defs.innerHTML = `
+    <linearGradient id="${uid}-area" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0E8A62" stop-opacity=".28"/>
+      <stop offset="1" stop-color="#0E8A62" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="${uid}-glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2.2" flood-color="#0E8A62" flood-opacity=".35"/>
+    </filter>
+    <filter id="${uid}-soft" x="-20%" y="-40%" width="140%" height="180%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#1B2B2A" flood-opacity=".18"/>
+    </filter>`;
+  svg.appendChild(defs);
+
+  // קווי רשת עדינים ותוויות
+  const ticks = [hi, Math.round((hi + lo) / 2), lo];
+  ticks.forEach((kg) => {
+    svg.appendChild(svgEl('line', { x1: L, x2: W - R, y1: y(kg), y2: y(kg), stroke: '#E9E7F0', 'stroke-width': 1, 'stroke-dasharray': '2 4' }));
+    const t = svgEl('text', { x: L - 8, y: y(kg) + 4, 'text-anchor': 'end', 'font-size': 12, fill: '#6B7480' });
     t.textContent = kg;
     svg.appendChild(t);
   });
 
-  // קו היעד
-  svg.appendChild(svgEl('line', { x1: L, x2: W - R, y1: y(goal), y2: y(goal), stroke: '#E8572E', 'stroke-width': 2, 'stroke-dasharray': '6 5' }));
-  const gl = svgEl('text', { x: W - R, y: y(goal) - 6, 'text-anchor': 'end', 'font-size': 13, 'font-weight': 700, fill: '#B23F1C' });
-  gl.textContent = `יעד ${formatKg(goal)}`;
-  svg.appendChild(gl);
+  // עקומה חלקה (Catmull-Rom) בין נקודות
+  const seg = (i) => {
+    const p0 = P[i - 2] || P[i - 1], p1 = P[i - 1], p2 = P[i], p3 = P[i + 1] || P[i];
+    const k = 0.18;
+    const c1x = p1.x + (p2.x - p0.x) * k, c1y = p1.y + (p2.y - p0.y) * k;
+    const c2x = p2.x - (p3.x - p1.x) * k, c2y = p2.y - (p3.y - p1.y) * k;
+    return `C${c1x.toFixed(1)} ${c1y.toFixed(1)} ${c2x.toFixed(1)} ${c2y.toFixed(1)} ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+  };
 
-  // שטח וקו המשקל
-  const line = pts.map((p, i) => `${i ? 'L' : 'M'}${x(p.date).toFixed(1)} ${y(p.kg).toFixed(1)}`).join(' ');
-  if (pts.length > 1) {
-    const area = `${line} L${x(pts[pts.length - 1].date).toFixed(1)} ${H - B} L${x(pts[0].date).toFixed(1)} ${H - B} Z`;
-    svg.appendChild(svgEl('path', { d: area, fill: 'rgba(14,138,98,.08)' }));
-    // כל קטע בצבע לפי הכיוון: ירוק לירידה, כתום לעלייה
-    for (let i = 1; i < pts.length; i++) {
-      const up = pts[i].kg > pts[i - 1].kg;
-      svg.appendChild(svgEl('line', { x1: x(pts[i - 1].date), y1: y(pts[i - 1].kg), x2: x(pts[i].date), y2: y(pts[i].kg),
-        stroke: up ? warnColor(data) : '#0E8A62', 'stroke-width': 3, 'stroke-linecap': 'round' }));
+  // קו היעד עם דגל
+  const gy = y(goal);
+  svg.appendChild(svgEl('line', { x1: L, x2: W - R, y1: gy, y2: gy, stroke: '#E8572E', 'stroke-width': 2, 'stroke-dasharray': '7 6', class: 'goal-line' }));
+  const goalG = svgEl('g', { class: 'goal-tag', filter: `url(#${uid}-soft)` });
+  const goalLabel = `יעד ${formatKg(goal)}`;
+  const gw = 14 + goalLabel.length * 7.2;
+  goalG.appendChild(svgEl('rect', { x: W - R - gw, y: gy - 13, width: gw, height: 26, rx: 13, fill: '#E8572E' }));
+  const gt = svgEl('text', { x: W - R - gw / 2, y: gy + 5, 'text-anchor': 'middle', 'font-size': 13, 'font-weight': 700, fill: '#FFFFFF' });
+  gt.textContent = goalLabel;
+  goalG.appendChild(gt);
+  // דגלון קטן בתחילת קו היעד
+  goalG.appendChild(svgEl('path', { d: `M${L + 2} ${gy} V${gy - 16} L${L + 14} ${gy - 11.5} L${L + 2} ${gy - 7}`, fill: '#E8572E', stroke: '#E8572E', 'stroke-width': 1.5, 'stroke-linejoin': 'round' }));
+  svg.appendChild(goalG);
+
+  if (P.length > 1) {
+    // שטח מתחת לעקומה
+    let d = `M${P[0].x.toFixed(1)} ${P[0].y.toFixed(1)}`;
+    for (let i = 1; i < P.length; i++) d += ' ' + seg(i);
+    const area = `${d} L${P[P.length - 1].x.toFixed(1)} ${H - B} L${P[0].x.toFixed(1)} ${H - B} Z`;
+    svg.appendChild(svgEl('path', { d: area, fill: `url(#${uid}-area)`, class: 'chart-area' }));
+    // כל קטע בצבע לפי הכיוון, מצויר באנימציה אחד אחרי השני
+    for (let i = 1; i < P.length; i++) {
+      const up = P[i].kg > P[i - 1].kg;
+      const path = svgEl('path', { d: `M${P[i - 1].x.toFixed(1)} ${P[i - 1].y.toFixed(1)} ${seg(i)}`, fill: 'none',
+        stroke: up ? warnColor(data) : '#0E8A62', 'stroke-width': 4, 'stroke-linecap': 'round',
+        pathLength: 1, class: 'chart-seg', filter: up ? '' : `url(#${uid}-glow)` });
+      path.style.animationDelay = `${150 + (i - 1) * 220}ms`;
+      svg.appendChild(path);
     }
   }
-  pts.forEach((p, i) => {
-    const cx = x(p.date), cy = y(p.kg);
-    const prev = pts[i - 1];
+
+  // נקודות
+  P.forEach((p, i) => {
+    const prev = P[i - 1];
     const delta = prev ? Math.round((p.kg - prev.kg) * 10) / 10 : 0;
+    const last = i === P.length - 1;
+    const g = svgEl('g', { class: 'chart-dot' });
+    g.style.animationDelay = `${150 + Math.max(0, i - 1) * 220 + (i ? 200 : 0)}ms`;
+    g.style.transformOrigin = `${p.x}px ${p.y}px`;
+    if (last) g.appendChild(svgEl('circle', { cx: p.x, cy: p.y, r: 14, fill: delta > 0 ? warnColor(data) : '#0E8A62', opacity: 0.18, class: 'chart-halo' }));
     if (delta > 0) {
-      // סימן אזהרה: עיגול כתום עם סימן קריאה
-      svg.appendChild(svgEl('circle', { cx, cy, r: 9, fill: warnColor(data), stroke: '#FFFFFF', 'stroke-width': 2 }));
-      svg.appendChild(svgEl('rect', { x: cx - 1.4, y: cy - 5.5, width: 2.8, height: 7, rx: 1.4, fill: '#FFFFFF' }));
-      svg.appendChild(svgEl('circle', { cx, cy: cy + 4.2, r: 1.5, fill: '#FFFFFF' }));
+      g.appendChild(svgEl('circle', { cx: p.x, cy: p.y, r: 9, fill: warnColor(data), stroke: '#FFFFFF', 'stroke-width': 2.5 }));
+      g.appendChild(svgEl('rect', { x: p.x - 1.4, y: p.y - 5.5, width: 2.8, height: 7, rx: 1.4, fill: '#FFFFFF' }));
+      g.appendChild(svgEl('circle', { cx: p.x, cy: p.y + 4.2, r: 1.5, fill: '#FFFFFF' }));
     } else if (delta < 0) {
-      // סימן הצלחה: עיגול ירוק עם וי
-      svg.appendChild(svgEl('circle', { cx, cy, r: 9, fill: '#0E8A62', stroke: '#FFFFFF', 'stroke-width': 2 }));
-      svg.appendChild(svgEl('path', { d: `M${cx - 4} ${cy} L${cx - 1} ${cy + 3} L${cx + 4.5} ${cy - 3.5}`, fill: 'none', stroke: '#FFFFFF', 'stroke-width': 2.2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+      g.appendChild(svgEl('circle', { cx: p.x, cy: p.y, r: 9, fill: '#0E8A62', stroke: '#FFFFFF', 'stroke-width': 2.5 }));
+      g.appendChild(svgEl('path', { d: `M${p.x - 4} ${p.y} L${p.x - 1} ${p.y + 3} L${p.x + 4.5} ${p.y - 3.5}`, fill: 'none', stroke: '#FFFFFF', 'stroke-width': 2.2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
     } else {
-      svg.appendChild(svgEl('circle', { cx, cy, r: 5, fill: '#FFFFFF', stroke: '#0E8A62', 'stroke-width': 3 }));
+      g.appendChild(svgEl('circle', { cx: p.x, cy: p.y, r: 6, fill: '#FFFFFF', stroke: '#0E8A62', 'stroke-width': 3 }));
     }
+    svg.appendChild(g);
   });
+
+  // בועת המשקל הנוכחי מעל הנקודה האחרונה
+  const lastP = P[P.length - 1];
+  const bubble = svgEl('g', { class: 'chart-bubble', filter: `url(#${uid}-soft)` });
+  bubble.style.animationDelay = `${300 + (P.length - 1) * 220}ms`;
+  const label = `${formatKg(lastP.kg)} ק"ג`;
+  const bw = 18 + label.length * 7.6;
+  const bx = Math.min(Math.max(lastP.x - bw / 2, L), W - R - bw);
+  const by = lastP.y - 44;
+  bubble.appendChild(svgEl('rect', { x: bx, y: by, width: bw, height: 28, rx: 14, fill: '#1B2B2A' }));
+  bubble.appendChild(svgEl('path', { d: `M${lastP.x - 6} ${by + 27} L${lastP.x} ${by + 34} L${lastP.x + 6} ${by + 27} Z`, fill: '#1B2B2A' }));
+  const bt = svgEl('text', { x: bx + bw / 2, y: by + 19, 'text-anchor': 'middle', 'font-size': 14, 'font-weight': 800, fill: '#FFFFFF', direction: 'rtl', 'unicode-bidi': 'embed' });
+  bt.textContent = label;
+  bubble.appendChild(bt);
+  svg.appendChild(bubble);
 
   // תוויות תאריך
   const fmt = (d) => new Date(d).toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric' });
-  [[pts[0].date, 'start', 'התחלה'], [pts[pts.length - 1].date, 'end', fmt(pts[pts.length - 1].date)]].forEach(([d, anchor, label], i) => {
-    if (i === 1 && pts.length === 1) return;
-    const t = svgEl('text', { x: x(d), y: H - 8, 'text-anchor': anchor, 'font-size': 12, fill: '#3E4A55' });
-    t.textContent = label;
-    svg.appendChild(t);
-  });
+  const first = svgEl('text', { x: P[0].x, y: H - 8, 'text-anchor': 'start', 'font-size': 12, fill: '#6B7480' });
+  first.textContent = `התחלה · ${formatKg(pts[0].kg)}`;
+  svg.appendChild(first);
+  if (P.length > 1) {
+    const lt = svgEl('text', { x: lastP.x, y: H - 8, 'text-anchor': 'end', 'font-size': 12, fill: '#6B7480' });
+    lt.textContent = fmt(lastP.date);
+    svg.appendChild(lt);
+  }
   return svg;
 }
 

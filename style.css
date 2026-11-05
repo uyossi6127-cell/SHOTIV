@@ -270,7 +270,7 @@ a.btn { text-decoration: none; }
   position: fixed;
   inset: 0;
   z-index: 100;
-  background: radial-gradient(120% 80% at 50% 40%, #6A50E6 0%, var(--accent) 55%, #4A30C4 100%);
+  background: radial-gradient(120% 80% at 50% 40%, #6A50E6 0%, #5B3FD9 55%, #4A30C4 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -503,3 +503,22 @@ html.theme-male .wordmark .wm-b { color: #4FA3DA; }
 }
 .weigh-nudge strong { color: var(--green); font-size: 18px; }
 .weigh-nudge span { color: #1F4D3C; font-size: 16px; }
+
+/* גרף משקל: אנימציה עדינה */
+.wchart { overflow: visible; }
+.chart-seg { stroke-dasharray: 1; stroke-dashoffset: 1; animation: seg-draw 520ms cubic-bezier(.65, 0, .35, 1) forwards; }
+.chart-area { opacity: 0; animation: fade-in 700ms ease 250ms forwards; }
+.chart-dot { opacity: 0; transform: scale(.3); animation: dot-pop 380ms cubic-bezier(.34, 1.56, .64, 1) forwards; }
+.chart-halo { transform-box: fill-box; transform-origin: center; animation: halo 2.2s ease-in-out 1.2s infinite; }
+.chart-bubble { opacity: 0; animation: bubble-in 420ms ease forwards; }
+.goal-tag { opacity: 0; animation: fade-in 500ms ease 100ms forwards; }
+@keyframes seg-draw { to { stroke-dashoffset: 0; } }
+@keyframes fade-in { to { opacity: 1; } }
+@keyframes dot-pop { to { opacity: 1; transform: scale(1); } }
+@keyframes halo { 0%, 100% { transform: scale(1); opacity: .18; } 50% { transform: scale(1.5); opacity: .05; } }
+@keyframes bubble-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .chart-seg { animation: none; stroke-dashoffset: 0; }
+  .chart-area, .chart-dot, .chart-bubble, .goal-tag { animation: none; opacity: 1; transform: none; }
+  .chart-halo { animation: none; }
+}
