@@ -337,11 +337,11 @@ a.btn { text-decoration: none; }
 @keyframes word-slim { from { font-weight: 900; letter-spacing: 0; } to { font-weight: 300; letter-spacing: 3px; } }
 @keyframes splash-out { to { opacity: 0; visibility: hidden; } }
 
+/* "הסר אנימציות" בטלפון: המסך מוצג במלואו ובאותו אורך, רק בלי סיבוב ונשימה מתמשכים */
 @media (prefers-reduced-motion: reduce) {
-  #splash { animation: splash-out 200ms ease 700ms forwards; }
-  .fig3d, .fig-svg, .splash-word, .splash-tag { animation: none; opacity: 1; transform: none; }
-  .splash-word { font-weight: 300; letter-spacing: 3px; }
-  .splash-ring { animation: none; stroke-dashoffset: 0; }
+  .fig3d { animation: figs-in 450ms ease 50ms forwards; }
+  .fig3d.man { animation-delay: 170ms; }
+  .fig-svg { animation: none; }
 }
 
 /* שילוב צבעים: לכל אזור באפליקציה צבע משלו */
