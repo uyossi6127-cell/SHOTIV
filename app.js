@@ -1,7 +1,7 @@
 'use strict';
 
 // ---------- שמירת נתונים (על המכשיר בלבד) ----------
-const APP_VERSION = '25';
+const APP_VERSION = '26';
 const STORAGE_KEY = 'shotiv.v1';
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
@@ -362,7 +362,7 @@ function svgEl(tag, attrs) {
 function warnColor(data) {
   const g = data.profile.gender;
   if (g === 'female') return '#D9818B'; // זהב ורוד
-  if (g === 'male') return '#5D88A8';   // כחול פנינה
+  if (g === 'male') return '#2F86C4';   // כחול פנינה
   return '#E07A2E';
 }
 
@@ -731,7 +731,7 @@ function downloadCalendar(data) {
   toast('פתח את הקובץ כדי להוסיף ליומן');
 }
 
-const THEME_COLORS = { female: '#EDA8AE', male: '#82A1B5' };
+const THEME_COLORS = { female: '#EDA8AE', male: '#3F95CF' };
 function applyTheme(gender) {
   const root = document.documentElement;
   root.classList.toggle('theme-female', gender === 'female');
