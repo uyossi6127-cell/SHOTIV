@@ -409,3 +409,29 @@ html.text-large #app { zoom: 1.15; }
 .chart svg { display: block; width: 100%; height: auto; direction: ltr; }
 .pace { background: var(--green-soft); color: #0A5A40; border-radius: 16px; padding: 14px 16px; font-size: 17px; }
 .history li button { background: none; border: 0; color: var(--muted); font: inherit; font-size: 15px; text-decoration: underline; min-height: 44px; cursor: pointer; }
+
+/* משוב על שינוי במשקל */
+.feedback {
+  display: flex; gap: 14px; align-items: flex-start;
+  border-radius: 20px; padding: 16px 18px; font-size: 17px; line-height: 1.45;
+}
+.feedback strong { font-size: 19px; }
+.feedback.down { background: var(--green-soft); color: #0A5A40; border: 2px solid #9ED9C1; }
+.feedback.up { background: #FFF1E6; color: #8A3A0C; border: 2px solid #F7C39E; }
+.feedback.same { background: var(--sky-soft); color: #134C8F; border: 2px solid #B8D3F3; }
+.feedback-icon { flex-shrink: 0; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; }
+.feedback.down .feedback-icon { background: var(--green); }
+.feedback.up .feedback-icon { background: #E07A2E; }
+.feedback.same .feedback-icon { background: var(--sky); }
+.feedback-icon svg { width: 24px; height: 24px; }
+.feedback.celebrate { animation: fb-pop 600ms cubic-bezier(.34, 1.56, .64, 1); position: relative; overflow: visible; }
+.feedback.celebrate .feedback-icon { animation: fb-spin 700ms ease; }
+@keyframes fb-pop { 0% { transform: scale(.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes fb-spin { 0% { transform: scale(.4) rotate(-90deg); } 70% { transform: scale(1.15) rotate(10deg); } 100% { transform: scale(1) rotate(0); } }
+.spark { position: absolute; width: 8px; height: 8px; border-radius: 50%; pointer-events: none; animation: spark 900ms ease-out forwards; }
+@keyframes spark { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(var(--dx), var(--dy)) scale(.3); opacity: 0; } }
+.feedback.warn-in { animation: fb-pop 450ms ease; }
+@media (prefers-reduced-motion: reduce) {
+  .feedback.celebrate, .feedback.celebrate .feedback-icon, .feedback.warn-in, .spark { animation: none; }
+  .spark { display: none; }
+}

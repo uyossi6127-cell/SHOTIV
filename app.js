@@ -187,6 +187,9 @@ function renderHome(data) {
 }
 
 function motivation(data, pct) {
+  const change = data.weights.length ? latestChange(data) : null;
+  if (change !== null && change > 0) return `בשקילה האחרונה עלית ${formatKg(change)} ק"ג. זה קורה, ותנודות קטנות טבעיות. ממשיכים בשגרה.`;
+  if (change !== null && change < 0 && pct < 100) return `ירדת ${formatKg(-change)} ק"ג מאז השקילה הקודמת. כל הכבוד, ממשיכים ככה!`;
   if (data.shots.length === 0) return 'ברוך הבא. כשתזריק, לחץ על "רשום זריקה" והספירה תתחיל.';
   if (pct >= 100) return 'הגעת ליעד. עכשיו המטרה היא לשמור עליו.';
   if (pct >= 50) return 'עברת את חצי הדרך. תמשיך באותו קצב.';
@@ -382,13 +385,30 @@ function buildChart(data) {
   const line = pts.map((p, i) => `${i ? 'L' : 'M'}${x(p.date).toFixed(1)} ${y(p.kg).toFixed(1)}`).join(' ');
   if (pts.length > 1) {
     const area = `${line} L${x(pts[pts.length - 1].date).toFixed(1)} ${H - B} L${x(pts[0].date).toFixed(1)} ${H - B} Z`;
-    svg.appendChild(svgEl('path', { d: area, fill: 'rgba(14,138,98,.10)' }));
-    svg.appendChild(svgEl('path', { d: line, fill: 'none', stroke: '#0E8A62', 'stroke-width': 3, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+    svg.appendChild(svgEl('path', { d: area, fill: 'rgba(14,138,98,.08)' }));
+    // כל קטע בצבע לפי הכיוון: ירוק לירידה, כתום לעלייה
+    for (let i = 1; i < pts.length; i++) {
+      const up = pts[i].kg > pts[i - 1].kg;
+      svg.appendChild(svgEl('line', { x1: x(pts[i - 1].date), y1: y(pts[i - 1].kg), x2: x(pts[i].date), y2: y(pts[i].kg),
+        stroke: up ? '#E07A2E' : '#0E8A62', 'stroke-width': 3, 'stroke-linecap': 'round' }));
+    }
   }
   pts.forEach((p, i) => {
-    const last = i === pts.length - 1;
-    svg.appendChild(svgEl('circle', { cx: x(p.date), cy: y(p.kg), r: last ? 6 : 4,
-      fill: last ? '#FFFFFF' : '#0E8A62', stroke: '#0E8A62', 'stroke-width': last ? 3 : 0 }));
+    const cx = x(p.date), cy = y(p.kg);
+    const prev = pts[i - 1];
+    const delta = prev ? Math.round((p.kg - prev.kg) * 10) / 10 : 0;
+    if (delta > 0) {
+      // סימן אזהרה: עיגול כתום עם סימן קריאה
+      svg.appendChild(svgEl('circle', { cx, cy, r: 9, fill: '#E07A2E', stroke: '#FFFFFF', 'stroke-width': 2 }));
+      svg.appendChild(svgEl('rect', { x: cx - 1.4, y: cy - 5.5, width: 2.8, height: 7, rx: 1.4, fill: '#FFFFFF' }));
+      svg.appendChild(svgEl('circle', { cx, cy: cy + 4.2, r: 1.5, fill: '#FFFFFF' }));
+    } else if (delta < 0) {
+      // סימן הצלחה: עיגול ירוק עם וי
+      svg.appendChild(svgEl('circle', { cx, cy, r: 9, fill: '#0E8A62', stroke: '#FFFFFF', 'stroke-width': 2 }));
+      svg.appendChild(svgEl('path', { d: `M${cx - 4} ${cy} L${cx - 1} ${cy + 3} L${cx + 4.5} ${cy - 3.5}`, fill: 'none', stroke: '#FFFFFF', 'stroke-width': 2.2, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+    } else {
+      svg.appendChild(svgEl('circle', { cx, cy, r: 5, fill: '#FFFFFF', stroke: '#0E8A62', 'stroke-width': 3 }));
+    }
   });
 
   // תוויות תאריך
@@ -416,7 +436,65 @@ function paceText(data) {
   return `קצב ממוצע: ${formatKg(perWeek)} ק"ג בשבוע. בקצב הזה תגיע ליעד בעוד כ-${weeksLeft} שבועות.`;
 }
 
-function renderWeight(data) {
+const ICONS = {
+  down: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  up: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M12 6v8"/><circle cx="12" cy="18.5" r="0.6" fill="#fff"/></svg>',
+  same: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><path d="M6 12h12"/></svg>',
+};
+
+function latestChange(data) {
+  const pts = weightPoints(data);
+  if (pts.length < 2) return null;
+  const last = pts[pts.length - 1], prev = pts[pts.length - 2];
+  return Math.round((last.kg - prev.kg) * 10) / 10;
+}
+
+function showFeedback(data, justSaved) {
+  const box = app.querySelector('[data-feedback]');
+  const change = latestChange(data);
+  if (change === null) return;
+  const total = Math.round((data.profile.startWeight - currentWeight(data)) * 10) / 10;
+  let kind, title, text;
+  if (change < 0) {
+    kind = 'down';
+    title = `כל הכבוד! ירדת ${formatKg(-change)} ק"ג מאז השקילה הקודמת`;
+    text = total > 0 ? `בסך הכל ירדת ${formatKg(total)} ק"ג. ממשיכים ככה.` : 'ממשיכים ככה.';
+  } else if (change > 0) {
+    kind = 'up';
+    title = `עלית ${formatKg(change)} ק"ג מאז השקילה הקודמת`;
+    text = 'תנודות של עד קילו הן טבעיות (מים, מלח, שינה). אם העלייה נמשכת שבועיים, כדאי להתייעץ עם הרופא או הדיאטנית.';
+  } else {
+    kind = 'same';
+    title = 'המשקל יציב מאז השקילה הקודמת';
+    text = 'יציבות היא גם התקדמות. ממשיכים בשגרה.';
+  }
+  box.hidden = false;
+  box.className = `feedback ${kind}`;
+  box.querySelector('[data-feedback-icon]').innerHTML = ICONS[kind];
+  box.querySelector('[data-feedback-title]').textContent = title;
+  box.querySelector('[data-feedback-text]').textContent = text;
+  if (!justSaved) return;
+  if (kind === 'down') {
+    box.classList.add('celebrate');
+    const colors = ['#0E8A62', '#5B3FD9', '#E8572E', '#E3AFA3', '#1F6FD1'];
+    for (let i = 0; i < 14; i++) {
+      const sp = document.createElement('span');
+      sp.className = 'spark';
+      const ang = (Math.PI * 2 * i) / 14;
+      sp.style.background = colors[i % colors.length];
+      sp.style.insetInlineStart = '30px';
+      sp.style.top = '30px';
+      sp.style.setProperty('--dx', `${Math.cos(ang) * 70}px`);
+      sp.style.setProperty('--dy', `${Math.sin(ang) * 50}px`);
+      box.appendChild(sp);
+      setTimeout(() => sp.remove(), 1000);
+    }
+  } else if (kind === 'up') {
+    box.classList.add('warn-in');
+  }
+}
+
+function renderWeight(data, justSaved = false) {
   mount('tpl-weight');
   const $ = (sel) => app.querySelector(sel);
   const input = $('[data-weight-input]');
@@ -440,8 +518,8 @@ function renderWeight(data) {
     data.weights.push({ date: new Date().toISOString(), kg });
     data.weights.sort((a, b) => new Date(a.date) - new Date(b.date));
     saveData(data);
-    toast('המשקל נשמר');
-    renderWeight(data);
+    renderWeight(data, true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
   const lost = data.profile.startWeight - currentWeight(data);
@@ -449,6 +527,7 @@ function renderWeight(data) {
   $('[data-chart]').appendChild(buildChart(data));
   const pace = paceText(data);
   if (pace) { $('[data-pace]').hidden = false; $('[data-pace]').textContent = pace; }
+  showFeedback(data, justSaved);
 
   if (data.weights.length) {
     $('[data-recent-card]').hidden = false;
