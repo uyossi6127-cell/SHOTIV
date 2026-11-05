@@ -517,7 +517,7 @@ if (splash) {
   const removeSplash = () => splash.remove();
   splash.addEventListener('animationend', (e) => { if (e.animationName === 'splash-out') removeSplash(); });
   splash.addEventListener('click', removeSplash);
-  setTimeout(removeSplash, 4000);
+  setTimeout(removeSplash, 5200);
   // מי שביקש פחות תנועה בטלפון רואה ישר את המצב הסופי של הדמויות.
   const art = splash.querySelector('.splash-art');
   if (art && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {

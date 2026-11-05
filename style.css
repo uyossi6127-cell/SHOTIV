@@ -276,7 +276,7 @@ a.btn { text-decoration: none; }
   align-items: center;
   justify-content: center;
   gap: 26px;
-  animation: splash-out 500ms ease 3100ms forwards;
+  animation: splash-out 600ms ease 4100ms forwards;
 }
 .splash-figs { opacity: 0; animation: figs-in 400ms ease 50ms forwards; }
 .splash-ring {
