@@ -439,8 +439,8 @@ html.text-large #app { zoom: 1.15; }
 /* אזהרה בצבע לפי מגדר */
 .feedback.up.g-female { background: linear-gradient(115deg, #FDE3E7, #F7C4C8 60%, #F2B8BE); color: #5E2531; border-color: #EDA8AE; }
 .feedback.up.g-female .feedback-icon { background: linear-gradient(135deg, #C46F7B, #A8525E); }
-.feedback.up.g-male { background: linear-gradient(135deg, #FFFFFF, #F1ECF6 55%, #E7EEF4); color: #3A3556; border-color: #CFCADF; }
-.feedback.up.g-male .feedback-icon { background: linear-gradient(135deg, #B5B1C9, #7E7A9A); }
+.feedback.up.g-male { background: linear-gradient(115deg, #E6F1F7, #B4D3E1 60%, #92B3C8); color: #1D3550; border-color: #92B3C8; }
+.feedback.up.g-male .feedback-icon { background: linear-gradient(135deg, #6C97B3, #3B5D79); }
 
 /* ערכת צבעים לפי מגדר: אישה = זהב ורוד, גבר = פנינה */
 html.theme-female {
@@ -474,22 +474,23 @@ html.theme-female .feedback.up.g-female { background: linear-gradient(115deg, #F
 html.theme-female .feedback.up.g-female .feedback-icon { background: linear-gradient(135deg, #C46F7B, #A8525E); }
 
 html.theme-male {
-  --accent: #5E5A7A;
-  --accent-deep: #3A3556;
-  --accent-soft: #EEEBF4;
-  --ground: #F8F7FA;
+  --accent: #3B5D79;          /* כחול פנינה עמוק לטקסט וכפתורים (ניגודיות טובה) */
+  --accent-deep: #24405A;
+  --accent-soft: #E3EEF5;
+  --ground: #F6F9FB;
 }
-html.theme-male .btn.primary {
-  background: linear-gradient(135deg, #77739A 0%, #5E5A7A 50%, #4A4664 100%);
-}
+html.theme-male .btn.primary { background: linear-gradient(135deg, #4E799B 0%, #3B5D79 55%, #2E4C66 100%); }
+/* הכרטיס הראשי בכחול פנינה מבריק, לפי דוגמת הפנינים */
 html.theme-male .next-shot {
-  background: linear-gradient(135deg, #FFFFFF 0%, #F3EEF6 40%, #E9EEF4 70%, #DCD8E8 100%);
-  color: #2F2B48;
-  border: 1px solid #DCD7E8;
-  box-shadow: 0 12px 26px -16px rgba(74, 70, 100, .55);
+  background: linear-gradient(115deg,
+    #92B3C8 0%, #B4D3E1 16%, #E6F1F7 27%, #B4D3E1 38%,
+    #9DBDD0 52%, #DCEBF3 64%, #A9C8DA 78%, #82A1B5 100%);
+  color: #1D3550;
+  border: 1px solid #B9D2E0;
+  box-shadow: 0 12px 26px -16px rgba(59, 93, 121, .6);
 }
-html.theme-male .next-shot .label-light { opacity: 1; color: #4A4664; }
-html.theme-male .next-shot .btn.light { background: linear-gradient(135deg, #77739A, #5E5A7A); color: #FFFFFF; }
-html.theme-male .next-shot .last-shot { color: #3A3556; }
-html.theme-male .wordmark { color: #5E5A7A; }
-html.theme-male .wordmark .wm-b { color: #A39FBA; }
+html.theme-male .next-shot .label-light { opacity: 1; color: #24405A; }
+html.theme-male .next-shot .btn.light { background: linear-gradient(135deg, #4E799B, #3B5D79); color: #FFFFFF; }
+html.theme-male .next-shot .last-shot { color: #1D3550; }
+html.theme-male .wordmark { color: #3B5D79; }
+html.theme-male .wordmark .wm-b { color: #6C97B3; }

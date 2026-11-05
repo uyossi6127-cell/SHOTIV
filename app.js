@@ -361,7 +361,7 @@ function svgEl(tag, attrs) {
 function warnColor(data) {
   const g = data.profile.gender;
   if (g === 'female') return '#D9818B'; // זהב ורוד
-  if (g === 'male') return '#8C88A6';   // פנינה (גוון כסוף כדי שייראה על רקע לבן)
+  if (g === 'male') return '#5D88A8';   // כחול פנינה
   return '#E07A2E';
 }
 
@@ -729,7 +729,7 @@ function downloadCalendar(data) {
   toast('פתח את הקובץ כדי להוסיף ליומן');
 }
 
-const THEME_COLORS = { female: '#EDA8AE', male: '#5E5A7A' };
+const THEME_COLORS = { female: '#EDA8AE', male: '#82A1B5' };
 function applyTheme(gender) {
   const root = document.documentElement;
   root.classList.toggle('theme-female', gender === 'female');
