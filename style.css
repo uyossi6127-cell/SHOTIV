@@ -1,14 +1,19 @@
 :root {
-  --ground: #F5F6F2;
+  --ground: #F7F6FB;
   --surface: #FFFFFF;
   --ink: #1B2B2A;
   --muted: #4F5E5C;
   --line: #CDD3CC;
-  --accent: #0F766E;
-  --accent-deep: #0A3F3A;
-  --accent-soft: #E3F1EE;
-  --warm-soft: #FFF4E5;
-  --warm-ink: #5B3A0A;
+  --accent: #5B3FD9;          /* סגול: זריקות ופעולה ראשית */
+  --accent-deep: #2E1F7A;
+  --accent-soft: #EEEBFD;
+  --green: #0E8A62;           /* ירוק: התקדמות ומשקל */
+  --green-soft: #E2F5EC;
+  --sky: #1F6FD1;             /* כחול: תזכורות וגיבוי */
+  --sky-soft: #E6F0FC;
+  --coral: #E8572E;           /* קורל: מוטיבציה וטיפים */
+  --warm-soft: #FFEDE6;
+  --warm-ink: #8A2E10;
   --error: #B42318;
   --radius: 20px;
   --font: "Heebo", system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
@@ -307,3 +312,19 @@ a.btn { text-decoration: none; }
   .splash-mark { animation: none; }
   .splash-word { animation: none; opacity: 1; transform: none; }
 }
+
+/* שילוב צבעים: לכל אזור באפליקציה צבע משלו */
+.wordmark .wm-b { color: var(--coral); }
+.stats .accent { color: var(--green); }
+.progress-fill { background: var(--green); }
+.card.progress-card { border-top: 5px solid var(--green); }
+.reminder { background: var(--sky-soft); }
+.reminder h2 { color: var(--sky); }
+.reminder .btn.outline { border-color: var(--sky); color: var(--sky); }
+.backup-nudge { border-color: var(--sky); }
+.backup-nudge strong { color: var(--sky); }
+.note { border-inline-start: 5px solid var(--coral); }
+.next-shot { background: var(--accent); box-shadow: 0 10px 24px -14px rgba(91, 63, 217, .7); }
+.choice.suggested span::after { color: var(--coral); }
+.splash-trend { stroke: #FF9B7A; }
+.splash-word .wm-b { color: #FFB59C; }

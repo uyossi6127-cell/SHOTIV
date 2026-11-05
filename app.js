@@ -130,7 +130,7 @@ function renderHome(data) {
 
   $('[data-goal]').textContent = `יעד: ${formatKg(profile.goalWeight)} ק"ג`;
   $('[data-now]').textContent = formatKg(now);
-  $('[data-lost]').textContent = lost > 0 ? '−' + formatKg(lost) : '0';
+  $('[data-lost]').textContent = lost > 0 ? '\u200E−' + formatKg(lost) : '0';
   $('[data-left]').textContent = formatKg(left);
   $('[data-progress-bar]').setAttribute('aria-valuenow', pct);
   $('[data-progress-text]').textContent = `${pct}% מהדרך ליעד`;
@@ -213,6 +213,7 @@ function dedupeShots(data) {
     seen.add(key);
     return true;
   });
+  data.shots.sort((a, b) => new Date(a.date) - new Date(b.date));
   if (data.shots.length !== before) saveData(data);
   return data;
 }
