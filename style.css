@@ -265,7 +265,7 @@ a.btn { text-decoration: none; }
 .backup-nudge strong { color: var(--accent-deep); }
 .backup-nudge span { color: var(--muted); font-size: 14px; }
 
-/* מסך פתיחה מונפש */
+/* מסך פתיחה מונפש: שתי דמויות מתעדנות בעדינות, ואז הלוגו */
 #splash {
   position: fixed;
   inset: 0;
@@ -275,41 +275,57 @@ a.btn { text-decoration: none; }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 18px;
-  animation: splash-out 450ms ease 1700ms forwards;
+  gap: 34px;
+  animation: splash-out 450ms ease 2700ms forwards;
 }
+.splash-people { display: flex; gap: 22px; align-items: flex-end; }
+.person { opacity: 0; animation: fig-in 300ms ease forwards; }
+.person.man { animation-delay: 120ms; }
+.fig-body {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  transform: scaleX(1.18);
+  animation: slim 1100ms cubic-bezier(.34, 1.2, .64, 1) 400ms forwards;
+}
+.man .fig-body { animation-delay: 520ms; }
+.smile { stroke-dasharray: 22; stroke-dashoffset: 22; animation: smile 350ms ease 1450ms forwards; }
+.man .smile { animation-delay: 1550ms; }
+.splash-brand { display: flex; align-items: center; gap: 12px; direction: ltr; }
 .splash-ring {
   stroke-dasharray: 943;
   stroke-dashoffset: 943;
-  animation: ring-draw 900ms cubic-bezier(.65, 0, .35, 1) 150ms forwards;
+  animation: ring-draw 650ms cubic-bezier(.65, 0, .35, 1) 1650ms forwards;
 }
 .splash-trend {
   stroke-dasharray: 260;
   stroke-dashoffset: 260;
-  animation: trend-draw 550ms cubic-bezier(.33, 1, .68, 1) 850ms forwards;
+  animation: trend-draw 400ms cubic-bezier(.33, 1, .68, 1) 2100ms forwards;
 }
-.splash-mark { animation: mark-pop 500ms cubic-bezier(.34, 1.56, .64, 1) 1250ms both; }
 .splash-word {
   color: #FFFFFF;
   font-family: var(--font);
-  font-size: 34px;
+  font-size: 36px;
   font-weight: 800;
   letter-spacing: 1px;
   opacity: 0;
-  transform: translateY(10px);
-  animation: word-in 500ms ease 1150ms forwards;
+  transform: translateY(8px);
+  animation: word-in 450ms ease 1850ms forwards;
 }
+@keyframes fig-in { to { opacity: 1; } }
+@keyframes slim { to { transform: scaleX(0.84); } }
+@keyframes smile { to { stroke-dashoffset: 0; } }
 @keyframes ring-draw { to { stroke-dashoffset: 243; } }
 @keyframes trend-draw { to { stroke-dashoffset: 0; } }
-@keyframes mark-pop { 0% { transform: scale(1); } 45% { transform: scale(1.08); } 100% { transform: scale(1); } }
 @keyframes word-in { to { opacity: 1; transform: translateY(0); } }
 @keyframes splash-out { to { opacity: 0; visibility: hidden; } }
 
 @media (prefers-reduced-motion: reduce) {
-  #splash { animation: splash-out 200ms ease 400ms forwards; }
-  .splash-ring, .splash-trend { animation: none; stroke-dashoffset: 0; }
-  .splash-ring { stroke-dashoffset: 243; }
-  .splash-mark { animation: none; }
+  #splash { animation: splash-out 200ms ease 600ms forwards; }
+  .person { opacity: 1; animation: none; }
+  .fig-body { animation: none; transform: scaleX(0.84); }
+  .smile { animation: none; stroke-dashoffset: 0; }
+  .splash-ring { animation: none; stroke-dashoffset: 243; }
+  .splash-trend { animation: none; stroke-dashoffset: 0; }
   .splash-word { animation: none; opacity: 1; transform: none; }
 }
 
@@ -326,5 +342,4 @@ a.btn { text-decoration: none; }
 .note { border-inline-start: 5px solid var(--coral); }
 .next-shot { background: var(--accent); box-shadow: 0 10px 24px -14px rgba(91, 63, 217, .7); }
 .choice.suggested span::after { color: var(--coral); }
-.splash-trend { stroke: #FF9B7A; }
 .splash-word .wm-b { color: #FFB59C; }

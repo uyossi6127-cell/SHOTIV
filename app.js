@@ -502,7 +502,7 @@ if (splash) {
   const removeSplash = () => splash.remove();
   splash.addEventListener('animationend', (e) => { if (e.animationName === 'splash-out') removeSplash(); });
   splash.addEventListener('click', removeSplash);
-  setTimeout(removeSplash, 3000);
+  setTimeout(removeSplash, 4000);
 }
 
 // ---------- התקנה כאפליקציה (S9) ----------

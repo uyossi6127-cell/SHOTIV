@@ -19,11 +19,43 @@
 <body>
   <!-- מסך פתיחה מונפש -->
   <div id="splash" aria-hidden="true">
-    <svg class="splash-mark" viewBox="0 0 512 512" width="132" height="132">
-      <circle class="splash-ring" cx="256" cy="256" r="150" fill="none" stroke="#FFFFFF" stroke-width="34" stroke-linecap="round" transform="rotate(-90 256 256)"/>
-      <path class="splash-trend" d="M200 300 L250 250 L280 280 L330 200" fill="none" stroke="#FFFFFF" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
-    <span class="splash-word">Shot<span class="wm-b">iv</span></span>
+    <div class="splash-people">
+      <svg class="person woman" viewBox="0 0 120 200" width="120" height="200">
+        <g class="fig-body">
+          <line x1="44" y1="146" x2="44" y2="188" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+          <line x1="76" y1="146" x2="76" y2="188" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+          <line x1="32" y1="80" x2="18" y2="122" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+          <line x1="88" y1="80" x2="102" y2="122" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+          <path d="M60 64 C22 64 14 118 20 150 L100 150 C106 118 98 64 60 64 Z" fill="#FF9B7A"/>
+        </g>
+        <circle cx="60" cy="17" r="9" fill="#FFB59C"/>
+        <circle cx="60" cy="40" r="20" fill="#FFFFFF"/>
+        <circle cx="53" cy="38" r="2.4" fill="#2E1F7A"/>
+        <circle cx="67" cy="38" r="2.4" fill="#2E1F7A"/>
+        <path class="smile" d="M52 46 Q60 53 68 46" fill="none" stroke="#2E1F7A" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+      <svg class="person man" viewBox="0 0 120 200" width="120" height="200">
+        <g class="fig-body">
+          <line x1="44" y1="146" x2="44" y2="188" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+          <line x1="76" y1="146" x2="76" y2="188" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+          <line x1="30" y1="80" x2="16" y2="124" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+          <line x1="90" y1="80" x2="104" y2="124" stroke="#FFFFFF" stroke-width="9" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+          <path d="M60 64 C16 64 12 112 24 148 L96 148 C108 112 104 64 60 64 Z" fill="#C9BCFF"/>
+        </g>
+        <circle cx="60" cy="40" r="20" fill="#FFFFFF"/>
+        <path d="M40 38 Q41 19 60 19 Q79 19 80 38 Q70 28 60 28 Q50 28 40 38 Z" fill="#2E1F7A"/>
+        <circle cx="53" cy="39" r="2.4" fill="#2E1F7A"/>
+        <circle cx="67" cy="39" r="2.4" fill="#2E1F7A"/>
+        <path class="smile" d="M52 47 Q60 54 68 47" fill="none" stroke="#2E1F7A" stroke-width="3" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="splash-brand">
+      <svg class="splash-mark" viewBox="0 0 512 512" width="56" height="56">
+        <circle class="splash-ring" cx="256" cy="256" r="150" fill="none" stroke="#FFFFFF" stroke-width="40" stroke-linecap="round" transform="rotate(-90 256 256)"/>
+        <path class="splash-trend" d="M200 300 L250 250 L280 280 L330 200" fill="none" stroke="#FF9B7A" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="splash-word">Shot<span class="wm-b">iv</span></span>
+    </div>
   </div>
 
   <main id="app" aria-live="polite"></main>
