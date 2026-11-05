@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0F766E">
+  <meta name="description" content="Shotiv – מעקב זריקות, משקל ותופעות לוואי למטופלי תרופות הרזיה">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Shotiv">
+  <title>Shotiv</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main id="app" aria-live="polite"></main>
+
+  <!-- מסך הרשמה ראשונית (S1) -->
+  <template id="tpl-onboarding">
+    <form class="screen onboarding" id="onboarding-form" novalidate>
+      <header class="stack-sm">
+        <h1>בוא נכיר את הטיפול שלך</h1>
+        <p class="muted">אנחנו רק מתעדים. את המינון קובע הרופא.</p>
+      </header>
+
+      <fieldset class="field">
+        <legend>סוג התרופה</legend>
+        <div class="choice-grid three">
+          <label class="choice"><input type="radio" name="med" value="מונג'רו" required><span>מונג'רו</span></label>
+          <label class="choice"><input type="radio" name="med" value="וויגובי"><span>וויגובי</span></label>
+          <label class="choice"><input type="radio" name="med" value="אחר"><span>אחר</span></label>
+        </div>
+      </fieldset>
+
+      <div class="grid-two">
+        <label class="field">מינון נוכחי (מ"ג)
+          <input name="dose" type="number" inputmode="decimal" step="0.25" min="0" required placeholder="5">
+        </label>
+        <label class="field">יום הזריקה
+          <select name="shotDay" required>
+            <option value="0">ראשון</option>
+            <option value="1">שני</option>
+            <option value="2">שלישי</option>
+            <option value="3">רביעי</option>
+            <option value="4">חמישי</option>
+            <option value="5">שישי</option>
+            <option value="6">שבת</option>
+          </select>
+        </label>
+        <label class="field">משקל נוכחי (ק"ג)
+          <input name="startWeight" type="number" inputmode="decimal" step="0.1" min="30" max="300" required placeholder="108">
+        </label>
+        <label class="field">משקל יעד (ק"ג)
+          <input name="goalWeight" type="number" inputmode="decimal" step="0.1" min="30" max="300" required placeholder="99">
+        </label>
+      </div>
+
+      <label class="field">שעת תזכורת ביום הזריקה
+        <input name="shotTime" type="time" value="20:00" required>
+      </label>
+
+      <p class="error" id="onboarding-error" role="alert" hidden></p>
+
+      <div class="spacer"></div>
+      <button class="btn primary" type="submit">שמור והמשך</button>
+    </form>
+  </template>
+
+  <!-- מסך בית (S2) -->
+  <template id="tpl-home">
+    <section class="screen home">
+      <header class="home-top">
+        <div class="stack-xs">
+          <span class="muted" data-greeting></span>
+          <h1 class="wordmark">Shotiv</h1>
+        </div>
+        <button class="btn ghost small" type="button" data-action="reset">איפוס</button>
+      </header>
+
+      <article class="card next-shot">
+        <span class="label-light">הזריקה הבאה</span>
+        <p class="countdown"><strong data-days></strong> <span data-days-word></span></p>
+        <p data-shot-meta></p>
+        <button class="btn light" type="button" data-action="log-shot">רשום זריקה</button>
+      </article>
+
+      <article class="card">
+        <div class="row-between">
+          <h2>ההתקדמות שלך</h2>
+          <span class="muted small-text" data-goal></span>
+        </div>
+        <dl class="stats">
+          <div><dt>עכשיו</dt><dd data-now></dd></div>
+          <div><dt>ירדת</dt><dd class="accent" data-lost></dd></div>
+          <div><dt>נשאר</dt><dd data-left></dd></div>
+        </dl>
+        <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-progress-bar>
+          <div class="progress-fill" data-progress-fill></div>
+        </div>
+        <p class="muted small-text" data-progress-text></p>
+      </article>
+
+      <p class="note" data-motivation></p>
+    </section>
+  </template>
+
+  <script src="app.js"></script>
+</body>
+</html>
