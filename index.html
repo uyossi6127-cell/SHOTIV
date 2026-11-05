@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@100..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=26">
+  <link rel="stylesheet" href="style.css?v=27">
 </head>
 <body>
   <!-- מסך פתיחה מונפש -->
@@ -140,6 +140,11 @@
 
       <p class="note" data-motivation></p>
 
+      <a class="weigh-nudge" href="#weight" data-weigh-nudge hidden>
+        <strong>הגיע הזמן להישקל</strong>
+        <span data-weigh-nudge-text></span>
+      </a>
+
       <a class="backup-nudge" href="#settings" data-backup-nudge hidden>
         <strong>כדאי לגבות את הנתונים</strong>
         <span data-backup-nudge-text></span>
@@ -260,6 +265,15 @@
         <a class="btn ghost small" href="#home">חזרה</a>
       </header>
 
+      <article class="card reminder">
+        <h2>תזכורות ביומן</h2>
+        <p class="muted small-text">אירוע קבוע ביומן של הטלפון. היומן מתריע גם כשהאפליקציה סגורה.</p>
+        <button class="btn outline" type="button" data-action="cal-shot">תזכורת לזריקה</button>
+        <p class="muted small-text" data-cal-shot-text></p>
+        <button class="btn outline" type="button" data-action="cal-weight">תזכורת לשקילה</button>
+        <p class="muted small-text" data-cal-weight-text></p>
+      </article>
+
       <fieldset class="card">
         <legend class="sr-only">גודל הטקסט</legend>
         <h2 aria-hidden="true">גודל הטקסט</h2>
@@ -334,6 +348,6 @@
     </form>
   </template>
 
-  <script src="app.js?v=26"></script>
+  <script src="app.js?v=27"></script>
 </body>
 </html>

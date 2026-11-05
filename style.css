@@ -495,3 +495,11 @@ html.theme-male .next-shot .last-shot { color: #0F2E4A; }
 html.theme-male .wordmark { color: #1F6FAE; }
 html.theme-male .wordmark .wm-b { color: #4FA3DA; }
 .version { text-align: center; }
+
+.weigh-nudge {
+  display: flex; flex-direction: column; gap: 2px;
+  background: var(--green-soft); border: 2px solid var(--green);
+  border-radius: 20px; padding: 14px 18px; color: var(--ink); text-decoration: none; font-size: 17px;
+}
+.weigh-nudge strong { color: var(--green); font-size: 18px; }
+.weigh-nudge span { color: #1F4D3C; font-size: 16px; }

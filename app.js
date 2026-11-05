@@ -1,7 +1,7 @@
 'use strict';
 
 // ---------- שמירת נתונים (על המכשיר בלבד) ----------
-const APP_VERSION = '26';
+const APP_VERSION = '27';
 const STORAGE_KEY = 'shotiv.v1';
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
@@ -179,6 +179,16 @@ function renderHome(data) {
       saveData(data);
       renderHome(data);
     });
+  }
+
+  // תזכורת להישקל: אם עברו 7 ימים ומעלה מהשקילה האחרונה (או מההרשמה)
+  const lastWeigh = data.weights.length ? data.weights[data.weights.length - 1].date : profile.createdAt;
+  const sinceWeigh = -daysUntil(lastWeigh);
+  if (sinceWeigh >= 7) {
+    $('[data-weigh-nudge]').hidden = false;
+    $('[data-weigh-nudge-text]').textContent = data.weights.length
+      ? `השקילה האחרונה הייתה לפני ${sinceWeigh} ימים. לחץ כאן לעדכון.`
+      : 'עוד לא עדכנת משקל מאז ההרשמה. לחץ כאן לעדכון.';
   }
 
   // תזכורת לגבות (S15): אחרי שיש נתונים שחבל לאבד, ואם לא גיבו 30 יום.
@@ -573,6 +583,12 @@ function renderSettings(data) {
   mount('tpl-settings');
   const $ = (sel) => app.querySelector(sel);
 
+  // תזכורות ביומן
+  $('[data-cal-shot-text]').textContent = `כל יום ${DAY_NAMES[data.profile.shotDay]} בשעה ${data.profile.shotTime}`;
+  $('[data-cal-weight-text]').textContent = `כל יום ${DAY_NAMES[weighReminderDate(data).getDay()]} בשעה 08:00, בבוקר שאחרי הזריקה`;
+  $('[data-action="cal-shot"]').addEventListener('click', () => downloadCalendar(data));
+  $('[data-action="cal-weight"]').addEventListener('click', () => downloadWeighCalendar(data));
+
   // מגדר (משפיע על צבע האזהרה)
   app.querySelectorAll('input[name="genderSetting"]').forEach((r) => {
     r.checked = r.value === data.profile.gender;
@@ -689,46 +705,69 @@ function renderDose(data) {
 }
 
 // ---------- תזכורת ביומן (S4) ----------
-function downloadCalendar(data) {
-  const { profile } = data;
-  const next = nextShotDate(data);
-  const [hh, mm] = profile.shotTime.split(':');
+function icsStamp(date, hh, mm) {
   const pad = (n) => String(n).padStart(2, '0');
-  const stamp = `${next.getFullYear()}${pad(next.getMonth() + 1)}${pad(next.getDate())}T${hh}${mm}00`;
+  return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}T${hh}${mm}00`;
+}
+
+function downloadIcs(filename, { uid, start, summary, description }) {
   const now = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
   const created = `${now.getUTCFullYear()}${pad(now.getUTCMonth() + 1)}${pad(now.getUTCDate())}T${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}00Z`;
   const ics = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//Shotiv//HE',
-    'CALSCALE:GREGORIAN',
+    'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Shotiv//HE', 'CALSCALE:GREGORIAN',
     'BEGIN:VEVENT',
-    `UID:shotiv-weekly-${Date.now()}@shotiv`,
+    `UID:${uid}-${Date.now()}@shotiv`,
     `DTSTAMP:${created}`,
-    `DTSTART:${stamp}`,
+    `DTSTART:${start}`,
     'DURATION:PT15M',
     'RRULE:FREQ=WEEKLY',
-    `SUMMARY:זריקת ${profile.med} – Shotiv`,
-    'DESCRIPTION:זמן לזריקה השבועית. אחרי הזריקה רשום אותה באפליקציה.',
-    'BEGIN:VALARM',
-    'ACTION:DISPLAY',
-    'DESCRIPTION:זמן לזריקה השבועית',
-    'TRIGGER:PT0M',
-    'END:VALARM',
-    'END:VEVENT',
-    'END:VCALENDAR',
+    `SUMMARY:${summary}`,
+    `DESCRIPTION:${description}`,
+    'BEGIN:VALARM', 'ACTION:DISPLAY', `DESCRIPTION:${summary}`, 'TRIGGER:PT0M', 'END:VALARM',
+    'END:VEVENT', 'END:VCALENDAR',
   ].join('\r\n');
-
   const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'shotiv-reminder.ics';
+  a.download = filename;
   document.body.appendChild(a);
   a.click();
   a.remove();
   setTimeout(() => URL.revokeObjectURL(url), 5000);
   toast('פתח את הקובץ כדי להוסיף ליומן');
+}
+
+// המופע הבא של יום בשבוע (היום נחשב)
+function nextWeekday(day, now = new Date()) {
+  const today = startOfDay(now);
+  return new Date(today.getTime() + ((day - today.getDay() + 7) % 7) * DAY_MS);
+}
+
+// תזכורת לזריקה (S4): ביום הזריקה הקבוע בשעה שנבחרה
+function downloadCalendar(data) {
+  const { profile } = data;
+  const [hh, mm] = profile.shotTime.split(':');
+  downloadIcs('shotiv-shot-reminder.ics', {
+    uid: 'shotiv-shot',
+    start: icsStamp(nextWeekday(profile.shotDay), hh, mm),
+    summary: `זריקת ${profile.med} – Shotiv`,
+    description: 'זמן לזריקה השבועית. אחרי הזריקה רשום אותה באפליקציה.',
+  });
+}
+
+// תזכורת לשקילה: בבוקר שאחרי יום הזריקה, 08:00
+function weighReminderDate(data) {
+  return nextWeekday((data.profile.shotDay + 1) % 7);
+}
+function downloadWeighCalendar(data) {
+  downloadIcs('shotiv-weigh-reminder.ics', {
+    uid: 'shotiv-weigh',
+    start: icsStamp(weighReminderDate(data), '08', '00'),
+    summary: 'שקילה שבועית – Shotiv',
+    description: 'בוקר, לפני ארוחה. עדכן את המשקל באפליקציה כדי לראות את ההתקדמות.',
+  });
 }
 
 const THEME_COLORS = { female: '#EDA8AE', male: '#3F95CF' };
