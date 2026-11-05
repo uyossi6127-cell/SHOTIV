@@ -88,6 +88,15 @@
         <button class="btn light" type="button" data-action="log-shot">רשום זריקה</button>
       </article>
 
+      <article class="card reminder" data-reminder-card hidden>
+        <div class="stack-xs">
+          <h2>תזכורת שבועית</h2>
+          <p class="muted small-text" data-reminder-text></p>
+        </div>
+        <button class="btn outline" type="button" data-action="add-calendar">הוסף ליומן בטלפון</button>
+        <button class="link-btn" type="button" data-action="calendar-done">כבר הוספתי</button>
+      </article>
+
       <article class="card">
         <div class="row-between">
           <h2>ההתקדמות שלך</h2>
@@ -106,6 +115,80 @@
 
       <p class="note" data-motivation></p>
     </section>
+  </template>
+
+  <!-- רישום זריקה (S3) -->
+  <template id="tpl-log">
+    <form class="screen log" id="log-form" novalidate>
+      <header class="row-between">
+        <h1>רישום זריקה</h1>
+        <a class="btn ghost small" href="#home">חזרה</a>
+      </header>
+
+      <article class="card">
+        <div class="row-between">
+          <span class="muted">תרופה ומינון</span>
+          <a class="small-link" href="#dose">שינוי מינון</a>
+        </div>
+        <p class="big-line" data-med-dose></p>
+        <p class="muted small-text">לפי המינון שהרופא קבע</p>
+      </article>
+
+      <fieldset class="card">
+        <legend class="muted card-legend">מתי</legend>
+        <div class="choice-grid two">
+          <label class="choice"><input type="radio" name="when" value="today" checked><span>היום</span></label>
+          <label class="choice"><input type="radio" name="when" value="other"><span>תאריך אחר</span></label>
+        </div>
+        <label class="field" data-other-date hidden>תאריך הזריקה
+          <input type="date" name="date">
+        </label>
+      </fieldset>
+
+      <fieldset class="card">
+        <legend class="sr-only">אזור ההזרקה</legend>
+        <div class="row-between">
+          <span class="muted" aria-hidden="true">אזור ההזרקה</span>
+          <span class="muted small-text" data-last-site></span>
+        </div>
+        <div class="choice-grid two" data-sites></div>
+        <p class="muted small-text">כדאי להחליף אזור בכל פעם. סימנו את האזור המומלץ.</p>
+      </fieldset>
+
+      <p class="error" id="log-error" role="alert" hidden></p>
+      <div class="spacer"></div>
+      <button class="btn primary" type="submit">שמור זריקה</button>
+    </form>
+  </template>
+
+  <!-- שינוי מינון (S8) -->
+  <template id="tpl-dose">
+    <form class="screen dose" id="dose-form" novalidate>
+      <header class="row-between">
+        <h1>שינוי מינון</h1>
+        <a class="btn ghost small" href="#log">חזרה</a>
+      </header>
+      <p class="note">עדכן כאן רק מינון שהרופא קבע. האפליקציה לא ממליצה על מינון.</p>
+
+      <article class="card">
+        <span class="muted">המינון הנוכחי</span>
+        <p class="big-line" data-current-dose></p>
+      </article>
+
+      <label class="field">המינון החדש (מ"ג)
+        <input name="dose" type="number" inputmode="decimal" step="0.25" min="0" required>
+      </label>
+
+      <p class="error" id="dose-error" role="alert" hidden></p>
+
+      <article class="card" data-history-card hidden>
+        <h2>היסטוריית מינונים</h2>
+        <ul class="history" data-history></ul>
+      </article>
+
+      <div class="spacer"></div>
+      <button class="btn primary" type="submit">שמור מינון</button>
+    </form>
   </template>
 
   <script src="app.js"></script>

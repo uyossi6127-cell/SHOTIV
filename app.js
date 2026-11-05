@@ -152,11 +152,18 @@ function renderHome(data) {
       renderHome(data);
     });
   } else {
-    logBtn.addEventListener('click', () => {
-      // גרסה ראשונית: רישום זריקה של היום במינון הנוכחי. המסך המלא יגיע בספרינט 2 (S3).
-      data.shots.push({ date: new Date().toISOString(), dose: profile.dose, site: null });
+    logBtn.addEventListener('click', () => { location.hash = '#log'; });
+  }
+
+  // תזכורת שבועית ביומן (S4): מוצגת עד שהמשתמש מאשר שהוסיף.
+  if (!profile.calendarAdded) {
+    $('[data-reminder-card]').hidden = false;
+    $('[data-reminder-text]').textContent =
+      `אירוע קבוע בכל יום ${DAY_NAMES[profile.shotDay]} בשעה ${profile.shotTime}. עובד גם כשהאפליקציה סגורה.`;
+    $('[data-action="add-calendar"]').addEventListener('click', () => downloadCalendar(data));
+    $('[data-action="calendar-done"]').addEventListener('click', () => {
+      profile.calendarAdded = true;
       saveData(data);
-      toast('הזריקה נרשמה');
       renderHome(data);
     });
   }
@@ -200,13 +207,176 @@ function dedupeShots(data) {
   return data;
 }
 
+// ---------- רישום זריקה (S3) ----------
+const SITES = ['בטן ימין', 'בטן שמאל', 'ירך ימין', 'ירך שמאל', 'זרוע ימין', 'זרוע שמאל'];
+
+function suggestedSite(data) {
+  const last = [...data.shots].reverse().find((s) => s.site);
+  if (!last) return SITES[0];
+  return SITES[(SITES.indexOf(last.site) + 1) % SITES.length];
+}
+
+function toDateInput(date) {
+  const d = new Date(date);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+function renderLog(data) {
+  mount('tpl-log');
+  const $ = (sel) => app.querySelector(sel);
+  const { profile } = data;
+  const form = document.getElementById('log-form');
+  const errorEl = document.getElementById('log-error');
+
+  $('[data-med-dose]').textContent = `${profile.med} · ${formatKg(profile.dose)} מ"ג`;
+
+  const lastWithSite = [...data.shots].reverse().find((s) => s.site);
+  $('[data-last-site]').textContent = lastWithSite ? `בפעם הקודמת: ${lastWithSite.site}` : '';
+
+  const suggestion = suggestedSite(data);
+  const sitesEl = $('[data-sites]');
+  SITES.forEach((site) => {
+    const label = document.createElement('label');
+    label.className = 'choice' + (site === suggestion ? ' suggested' : '');
+    const input = document.createElement('input');
+    input.type = 'radio';
+    input.name = 'site';
+    input.value = site;
+    input.checked = site === suggestion;
+    const span = document.createElement('span');
+    span.textContent = site;
+    label.append(input, span);
+    sitesEl.appendChild(label);
+  });
+
+  const dateInput = form.elements.date;
+  dateInput.max = toDateInput(new Date());
+  dateInput.value = toDateInput(new Date());
+  form.querySelectorAll('input[name="when"]').forEach((r) => {
+    r.addEventListener('change', () => {
+      $('[data-other-date]').hidden = form.elements.when.value !== 'other';
+    });
+  });
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const when = form.elements.when.value;
+    const date = when === 'today' ? new Date() : new Date(dateInput.value + 'T12:00:00');
+
+    if (isNaN(date)) return showError(errorEl, 'בחר תאריך.');
+    if (daysUntil(date) > 0) return showError(errorEl, 'אי אפשר לרשום זריקה בתאריך עתידי.');
+    if (data.shots.some((s) => daysUntil(s.date, date) === 0)) {
+      return showError(errorEl, 'כבר נרשמה זריקה בתאריך הזה.');
+    }
+
+    data.shots.push({ date: date.toISOString(), dose: profile.dose, site: form.elements.site.value });
+    data.shots.sort((a, b) => new Date(a.date) - new Date(b.date));
+    saveData(data);
+    toast('הזריקה נרשמה');
+    location.hash = '#home';
+  });
+}
+
+function showError(el, message) {
+  el.textContent = message;
+  el.hidden = false;
+}
+
+// ---------- שינוי מינון (S8) ----------
+function renderDose(data) {
+  mount('tpl-dose');
+  const $ = (sel) => app.querySelector(sel);
+  const { profile } = data;
+  const form = document.getElementById('dose-form');
+  const errorEl = document.getElementById('dose-error');
+  data.doseHistory = data.doseHistory || [{ date: profile.createdAt, dose: profile.dose }];
+
+  $('[data-current-dose]').textContent = `${profile.med} · ${formatKg(profile.dose)} מ"ג`;
+
+  if (data.doseHistory.length > 1) {
+    $('[data-history-card]').hidden = false;
+    const list = $('[data-history]');
+    [...data.doseHistory].reverse().forEach((h) => {
+      const li = document.createElement('li');
+      const d = document.createElement('span');
+      d.textContent = new Date(h.date).toLocaleDateString('he-IL');
+      const v = document.createElement('strong');
+      v.textContent = `${formatKg(h.dose)} מ"ג`;
+      li.append(d, v);
+      list.appendChild(li);
+    });
+  }
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const dose = Number(form.elements.dose.value);
+    if (!(dose > 0)) return showError(errorEl, 'הזן את המינון החדש שהרופא קבע.');
+    if (dose === profile.dose) return showError(errorEl, 'זה המינון הנוכחי.');
+    profile.dose = dose;
+    data.doseHistory.push({ date: new Date().toISOString(), dose });
+    saveData(data);
+    toast('המינון עודכן');
+    location.hash = '#log';
+  });
+}
+
+// ---------- תזכורת ביומן (S4) ----------
+function downloadCalendar(data) {
+  const { profile } = data;
+  const next = nextShotDate(data);
+  const [hh, mm] = profile.shotTime.split(':');
+  const pad = (n) => String(n).padStart(2, '0');
+  const stamp = `${next.getFullYear()}${pad(next.getMonth() + 1)}${pad(next.getDate())}T${hh}${mm}00`;
+  const now = new Date();
+  const created = `${now.getUTCFullYear()}${pad(now.getUTCMonth() + 1)}${pad(now.getUTCDate())}T${pad(now.getUTCHours())}${pad(now.getUTCMinutes())}00Z`;
+  const ics = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Shotiv//HE',
+    'CALSCALE:GREGORIAN',
+    'BEGIN:VEVENT',
+    `UID:shotiv-weekly-${Date.now()}@shotiv`,
+    `DTSTAMP:${created}`,
+    `DTSTART:${stamp}`,
+    'DURATION:PT15M',
+    'RRULE:FREQ=WEEKLY',
+    `SUMMARY:זריקת ${profile.med} – Shotiv`,
+    'DESCRIPTION:זמן לזריקה השבועית. אחרי הזריקה רשום אותה באפליקציה.',
+    'BEGIN:VALARM',
+    'ACTION:DISPLAY',
+    'DESCRIPTION:זמן לזריקה השבועית',
+    'TRIGGER:PT0M',
+    'END:VALARM',
+    'END:VEVENT',
+    'END:VCALENDAR',
+  ].join('\r\n');
+
+  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'shotiv-reminder.ics';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  toast('פתח את הקובץ כדי להוסיף ליומן');
+}
+
+// ---------- ניווט בין מסכים ----------
 function render() {
   const raw = loadData();
   const data = raw && raw.profile ? dedupeShots(raw) : raw;
-  if (data && data.profile) renderHome(data);
-  else renderOnboarding();
+  if (!data || !data.profile) return renderOnboarding();
+  const route = location.hash.replace('#', '');
+  if (route === 'log') return renderLog(data);
+  if (route === 'dose') return renderDose(data);
+  renderHome(data);
+  window.scrollTo(0, 0);
 }
 
+window.addEventListener('hashchange', render);
 render();
 
 // ---------- התקנה כאפליקציה (S9) ----------
