@@ -437,31 +437,41 @@ html.text-large #app { zoom: 1.15; }
 }
 
 /* אזהרה בצבע לפי מגדר */
-.feedback.up.g-female { background: linear-gradient(135deg, #FDF1EE, #F8E2DC); color: #74343E; border-color: #E2B2A6; }
-.feedback.up.g-female .feedback-icon { background: linear-gradient(135deg, #D99A8E, #9C5862); }
+.feedback.up.g-female { background: linear-gradient(115deg, #FDE3E7, #F7C4C8 60%, #F2B8BE); color: #5E2531; border-color: #EDA8AE; }
+.feedback.up.g-female .feedback-icon { background: linear-gradient(135deg, #C46F7B, #A8525E); }
 .feedback.up.g-male { background: linear-gradient(135deg, #FFFFFF, #F1ECF6 55%, #E7EEF4); color: #3A3556; border-color: #CFCADF; }
 .feedback.up.g-male .feedback-icon { background: linear-gradient(135deg, #B5B1C9, #7E7A9A); }
 
 /* ערכת צבעים לפי מגדר: אישה = זהב ורוד, גבר = פנינה */
 html.theme-female {
-  --accent: #9C5862;
-  --accent-deep: #6E3540;
-  --accent-soft: #F9E8E3;
-  --ground: #FCF7F5;
+  --accent: #A8525E;          /* גוון עמוק של הזהב הוורוד לטקסט וכפתורים (ניגודיות טובה) */
+  --accent-deep: #6E2F3A;
+  --accent-soft: #FBE3E6;
+  --ground: #FFF8F8;
 }
-html.theme-female .next-shot,
-html.theme-female .btn.primary {
-  background: linear-gradient(135deg, #B0707A 0%, #9C5862 45%, #844652 100%);
+/* הכרטיס הראשי בזהב ורוד בהיר ומבריק, לפי דוגמת הצבע */
+html.theme-female .next-shot {
+  background: linear-gradient(115deg,
+    #EDA8AE 0%, #F4BEC3 14%, #FBD7DA 24%, #FDE3E7 30%, #F4BEC3 42%,
+    #F7C4C8 55%, #FDDDE1 66%, #F2B8BE 80%, #E3939A 100%);
+  color: #5E2531;
+  border: 1px solid #EFC2C6;
+  box-shadow: 0 12px 26px -16px rgba(168, 82, 94, .6);
 }
-html.theme-female .next-shot { box-shadow: 0 12px 26px -14px rgba(132, 70, 82, .75); }
+html.theme-female .next-shot .label-light { opacity: 1; color: #7A3644; }
+html.theme-female .next-shot .btn.light { background: linear-gradient(135deg, #B35C68, #9E4A57); color: #FFFFFF; }
+html.theme-female .next-shot .last-shot { color: #6E2F3A; }
+html.theme-female .btn.primary { background: linear-gradient(135deg, #B35C68 0%, #A8525E 50%, #934450 100%); }
 html.theme-female .next-shot::after,
 html.theme-male .next-shot::after {
   content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, .22) 45%, transparent 60%);
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, .35) 45%, transparent 60%);
 }
 html.theme-female .next-shot, html.theme-male .next-shot { position: relative; overflow: hidden; }
-html.theme-female .wordmark { color: #9C5862; }
-html.theme-female .wordmark .wm-b { color: #C98478; }
+html.theme-female .wordmark { color: #A8525E; }
+html.theme-female .wordmark .wm-b { color: #E3939A; }
+html.theme-female .feedback.up.g-female { background: linear-gradient(115deg, #FDE3E7, #F7C4C8 60%, #F2B8BE); color: #5E2531; border-color: #EDA8AE; }
+html.theme-female .feedback.up.g-female .feedback-icon { background: linear-gradient(135deg, #C46F7B, #A8525E); }
 
 html.theme-male {
   --accent: #5E5A7A;
