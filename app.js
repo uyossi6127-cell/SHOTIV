@@ -495,6 +495,15 @@ function render() {
 window.addEventListener('hashchange', render);
 render();
 
+// מסך הפתיחה: נעלם לבד בסוף האנימציה, או בנגיעה.
+const splash = document.getElementById('splash');
+if (splash) {
+  const removeSplash = () => splash.remove();
+  splash.addEventListener('animationend', (e) => { if (e.animationName === 'splash-out') removeSplash(); });
+  splash.addEventListener('click', removeSplash);
+  setTimeout(removeSplash, 3000);
+}
+
 // ---------- התקנה כאפליקציה (S9) ----------
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
