@@ -503,6 +503,12 @@ if (splash) {
   splash.addEventListener('animationend', (e) => { if (e.animationName === 'splash-out') removeSplash(); });
   splash.addEventListener('click', removeSplash);
   setTimeout(removeSplash, 4000);
+  // מי שביקש פחות תנועה בטלפון רואה ישר את המצב הסופי של הדמויות.
+  const art = splash.querySelector('.splash-art');
+  if (art && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    art.pauseAnimations();
+    art.setCurrentTime(3);
+  }
 }
 
 // ---------- התקנה כאפליקציה (S9) ----------
