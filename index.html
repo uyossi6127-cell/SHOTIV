@@ -127,6 +127,7 @@
           <div class="progress-fill" data-progress-fill></div>
         </div>
         <p class="muted small-text" data-progress-text></p>
+        <a class="btn green" href="#weight">עדכון משקל</a>
       </article>
 
       <p class="note" data-motivation></p>
@@ -192,6 +193,46 @@
       <p class="muted" data-history-summary></p>
       <ul class="shot-list" data-shot-list></ul>
       <p class="note" data-history-empty hidden>עדיין לא נרשמו זריקות.</p>
+    </section>
+  </template>
+
+  <!-- שקילה וגרף (S5, S6) -->
+  <template id="tpl-weight">
+    <section class="screen weight">
+      <header class="row-between">
+        <h1>עדכון משקל</h1>
+        <a class="btn ghost small" href="#home">חזרה</a>
+      </header>
+
+      <article class="card">
+        <span class="muted">המשקל היום</span>
+        <div class="stepper">
+          <button class="step-btn" type="button" data-step="0.1" aria-label="הוסף 0.1 קילו">+</button>
+          <label class="weight-input">
+            <span class="sr-only">משקל בקילוגרמים</span>
+            <input type="number" inputmode="decimal" step="0.1" min="30" max="300" data-weight-input>
+            <span aria-hidden="true">ק"ג</span>
+          </label>
+          <button class="step-btn" type="button" data-step="-0.1" aria-label="הפחת 0.1 קילו">−</button>
+        </div>
+        <p class="error" data-weight-error role="alert" hidden></p>
+        <button class="btn green big" type="button" data-action="save-weight">שמור משקל</button>
+        <p class="muted small-text" data-today-note hidden>כבר נשקלת היום. שמירה תעדכן את השקילה של היום.</p>
+      </article>
+
+      <article class="card">
+        <div class="row-between">
+          <h2>ההתקדמות שלך</h2>
+          <span class="lost-badge" data-lost-badge></span>
+        </div>
+        <div class="chart" data-chart></div>
+        <p class="pace" data-pace hidden></p>
+      </article>
+
+      <article class="card" data-recent-card hidden>
+        <h2>שקילות אחרונות</h2>
+        <ul class="history" data-recent></ul>
+      </article>
     </section>
   </template>
 

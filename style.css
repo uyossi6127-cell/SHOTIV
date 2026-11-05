@@ -385,3 +385,27 @@ h2 { font-size: 19px; }
 /* אפשרות "טקסט גדול" בהגדרות */
 html.text-large #app { zoom: 1.15; }
 .segmented { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+
+/* שקילה וגרף (S5, S6) */
+.btn.green { background: var(--green); color: #FFFFFF; text-decoration: none; }
+.btn.big { min-height: 62px; font-size: 20px; }
+.stepper { display: grid; grid-template-columns: 68px minmax(0, 1fr) 68px; gap: 10px; align-items: center; }
+.step-btn {
+  height: 72px; border-radius: 20px; border: 2px solid var(--line); background: var(--surface);
+  font: inherit; font-size: 38px; font-weight: 700; color: var(--ink); cursor: pointer;
+}
+.step-btn:active { background: var(--green-soft); border-color: var(--green); }
+.step-btn:focus-visible { outline: 3px solid var(--green); outline-offset: 2px; }
+.weight-input { display: flex; flex-direction: column; align-items: center; gap: 0; min-width: 0; }
+.weight-input input {
+  width: 100%; border: 0; padding: 0; background: transparent; text-align: center;
+  font: inherit; font-size: 44px; font-weight: 800; color: var(--ink); direction: ltr; line-height: 1.1;
+  -moz-appearance: textfield;
+}
+.weight-input input::-webkit-outer-spin-button, .weight-input input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.weight-input input:focus-visible { outline: 3px solid var(--green); outline-offset: 4px; border-radius: 12px; }
+.weight-input span { font-size: 17px; color: var(--muted); }
+.lost-badge { background: var(--green-soft); color: var(--green); font-weight: 800; border-radius: 999px; padding: 4px 12px; font-size: 16px; }
+.chart svg { display: block; width: 100%; height: auto; direction: ltr; }
+.pace { background: var(--green-soft); color: #0A5A40; border-radius: 16px; padding: 14px 16px; font-size: 17px; }
+.history li button { background: none; border: 0; color: var(--muted); font: inherit; font-size: 15px; text-decoration: underline; min-height: 44px; cursor: pointer; }

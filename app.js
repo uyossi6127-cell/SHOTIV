@@ -338,6 +338,143 @@ function renderHistory(data) {
   });
 }
 
+// ---------- שקילה וגרף (S5, S6) ----------
+function weightPoints(data) {
+  return [{ date: data.profile.createdAt, kg: data.profile.startWeight, start: true }, ...data.weights]
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
+}
+
+function svgEl(tag, attrs) {
+  const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+  Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
+  return el;
+}
+
+function buildChart(data) {
+  const pts = weightPoints(data);
+  const goal = data.profile.goalWeight;
+  const W = 340, H = 210, L = 38, R = 14, T = 16, B = 30;
+  const t0 = new Date(pts[0].date).getTime();
+  const t1 = Math.max(new Date(pts[pts.length - 1].date).getTime(), t0 + 7 * DAY_MS);
+  const kgs = pts.map((p) => p.kg).concat(goal);
+  const lo = Math.floor(Math.min(...kgs) - 1), hi = Math.ceil(Math.max(...kgs) + 1);
+  const x = (d) => L + ((new Date(d).getTime() - t0) / (t1 - t0)) * (W - L - R);
+  const y = (kg) => T + ((hi - kg) / (hi - lo)) * (H - T - B);
+
+  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img',
+    'aria-label': `גרף משקל: מ-${formatKg(pts[0].kg)} ל-${formatKg(pts[pts.length - 1].kg)} קילו, יעד ${formatKg(goal)}` });
+
+  // קווי רקע ותוויות ציר
+  [hi, Math.round((hi + lo) / 2), lo].forEach((kg) => {
+    svg.appendChild(svgEl('line', { x1: L, x2: W - R, y1: y(kg), y2: y(kg), stroke: '#E6E4EE', 'stroke-width': 1 }));
+    const t = svgEl('text', { x: L - 6, y: y(kg) + 4, 'text-anchor': 'end', 'font-size': 12, fill: '#3E4A55' });
+    t.textContent = kg;
+    svg.appendChild(t);
+  });
+
+  // קו היעד
+  svg.appendChild(svgEl('line', { x1: L, x2: W - R, y1: y(goal), y2: y(goal), stroke: '#E8572E', 'stroke-width': 2, 'stroke-dasharray': '6 5' }));
+  const gl = svgEl('text', { x: W - R, y: y(goal) - 6, 'text-anchor': 'end', 'font-size': 13, 'font-weight': 700, fill: '#B23F1C' });
+  gl.textContent = `יעד ${formatKg(goal)}`;
+  svg.appendChild(gl);
+
+  // שטח וקו המשקל
+  const line = pts.map((p, i) => `${i ? 'L' : 'M'}${x(p.date).toFixed(1)} ${y(p.kg).toFixed(1)}`).join(' ');
+  if (pts.length > 1) {
+    const area = `${line} L${x(pts[pts.length - 1].date).toFixed(1)} ${H - B} L${x(pts[0].date).toFixed(1)} ${H - B} Z`;
+    svg.appendChild(svgEl('path', { d: area, fill: 'rgba(14,138,98,.10)' }));
+    svg.appendChild(svgEl('path', { d: line, fill: 'none', stroke: '#0E8A62', 'stroke-width': 3, 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }));
+  }
+  pts.forEach((p, i) => {
+    const last = i === pts.length - 1;
+    svg.appendChild(svgEl('circle', { cx: x(p.date), cy: y(p.kg), r: last ? 6 : 4,
+      fill: last ? '#FFFFFF' : '#0E8A62', stroke: '#0E8A62', 'stroke-width': last ? 3 : 0 }));
+  });
+
+  // תוויות תאריך
+  const fmt = (d) => new Date(d).toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric' });
+  [[pts[0].date, 'start', 'התחלה'], [pts[pts.length - 1].date, 'end', fmt(pts[pts.length - 1].date)]].forEach(([d, anchor, label], i) => {
+    if (i === 1 && pts.length === 1) return;
+    const t = svgEl('text', { x: x(d), y: H - 8, 'text-anchor': anchor, 'font-size': 12, fill: '#3E4A55' });
+    t.textContent = label;
+    svg.appendChild(t);
+  });
+  return svg;
+}
+
+function paceText(data) {
+  const pts = weightPoints(data);
+  if (pts.length < 2) return null;
+  const first = pts[0], last = pts[pts.length - 1];
+  const weeks = (new Date(last.date) - new Date(first.date)) / (7 * DAY_MS);
+  const lost = first.kg - last.kg;
+  const left = last.kg - data.profile.goalWeight;
+  if (left <= 0) return 'הגעת ליעד! עכשיו המטרה היא לשמור עליו.';
+  if (weeks < 1 || lost <= 0) return null;
+  const perWeek = lost / weeks;
+  const weeksLeft = Math.ceil(left / perWeek);
+  return `קצב ממוצע: ${formatKg(perWeek)} ק"ג בשבוע. בקצב הזה תגיע ליעד בעוד כ-${weeksLeft} שבועות.`;
+}
+
+function renderWeight(data) {
+  mount('tpl-weight');
+  const $ = (sel) => app.querySelector(sel);
+  const input = $('[data-weight-input]');
+  const errorEl = $('[data-weight-error]');
+  input.value = (Math.round(currentWeight(data) * 10) / 10).toFixed(1);
+
+  const todayEntry = data.weights.find((w) => daysUntil(w.date) === 0);
+  $('[data-today-note]').hidden = !todayEntry;
+
+  app.querySelectorAll('[data-step]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const v = (Number(input.value) || currentWeight(data)) + Number(btn.dataset.step);
+      input.value = (Math.round(v * 10) / 10).toFixed(1);
+    });
+  });
+
+  $('[data-action="save-weight"]').addEventListener('click', () => {
+    const kg = Math.round(Number(input.value) * 10) / 10;
+    if (!(kg >= 30 && kg <= 300)) return showError(errorEl, 'הזן משקל בין 30 ל-300 ק"ג.');
+    data.weights = data.weights.filter((w) => daysUntil(w.date) !== 0);
+    data.weights.push({ date: new Date().toISOString(), kg });
+    data.weights.sort((a, b) => new Date(a.date) - new Date(b.date));
+    saveData(data);
+    toast('המשקל נשמר');
+    renderWeight(data);
+  });
+
+  const lost = data.profile.startWeight - currentWeight(data);
+  $('[data-lost-badge]').textContent = lost > 0 ? `ירדת ${formatKg(lost)} ק"ג` : 'בהתחלה';
+  $('[data-chart]').appendChild(buildChart(data));
+  const pace = paceText(data);
+  if (pace) { $('[data-pace]').hidden = false; $('[data-pace]').textContent = pace; }
+
+  if (data.weights.length) {
+    $('[data-recent-card]').hidden = false;
+    const list = $('[data-recent]');
+    [...data.weights].reverse().slice(0, 6).forEach((w) => {
+      const li = document.createElement('li');
+      const d = document.createElement('span');
+      d.textContent = new Date(w.date).toLocaleDateString('he-IL', { weekday: 'short', day: 'numeric', month: 'numeric' });
+      const v = document.createElement('strong');
+      v.textContent = `${formatKg(w.kg)} ק"ג`;
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.textContent = 'מחק';
+      del.setAttribute('aria-label', `מחק שקילה של ${d.textContent}`);
+      del.addEventListener('click', () => {
+        if (!window.confirm('למחוק את השקילה הזו?')) return;
+        data.weights = data.weights.filter((x) => x !== w);
+        saveData(data);
+        renderWeight(data);
+      });
+      li.append(d, v, del);
+      list.appendChild(li);
+    });
+  }
+}
+
 // ---------- הגדרות וגיבוי (S15) ----------
 function renderSettings(data) {
   mount('tpl-settings');
@@ -504,6 +641,7 @@ function render() {
   if (route === 'dose') return renderDose(data);
   if (route === 'history') return renderHistory(data);
   if (route === 'settings') return renderSettings(data);
+  if (route === 'weight') return renderWeight(data);
   renderHome(data);
   window.scrollTo(0, 0);
 }
