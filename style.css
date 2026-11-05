@@ -441,3 +441,45 @@ html.text-large #app { zoom: 1.15; }
 .feedback.up.g-female .feedback-icon { background: linear-gradient(135deg, #D99A8E, #9C5862); }
 .feedback.up.g-male { background: linear-gradient(135deg, #FFFFFF, #F1ECF6 55%, #E7EEF4); color: #3A3556; border-color: #CFCADF; }
 .feedback.up.g-male .feedback-icon { background: linear-gradient(135deg, #B5B1C9, #7E7A9A); }
+
+/* ערכת צבעים לפי מגדר: אישה = זהב ורוד, גבר = פנינה */
+html.theme-female {
+  --accent: #9C5862;
+  --accent-deep: #6E3540;
+  --accent-soft: #F9E8E3;
+  --ground: #FCF7F5;
+}
+html.theme-female .next-shot,
+html.theme-female .btn.primary {
+  background: linear-gradient(135deg, #B0707A 0%, #9C5862 45%, #844652 100%);
+}
+html.theme-female .next-shot { box-shadow: 0 12px 26px -14px rgba(132, 70, 82, .75); }
+html.theme-female .next-shot::after,
+html.theme-male .next-shot::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, .22) 45%, transparent 60%);
+}
+html.theme-female .next-shot, html.theme-male .next-shot { position: relative; overflow: hidden; }
+html.theme-female .wordmark { color: #9C5862; }
+html.theme-female .wordmark .wm-b { color: #C98478; }
+
+html.theme-male {
+  --accent: #5E5A7A;
+  --accent-deep: #3A3556;
+  --accent-soft: #EEEBF4;
+  --ground: #F8F7FA;
+}
+html.theme-male .btn.primary {
+  background: linear-gradient(135deg, #77739A 0%, #5E5A7A 50%, #4A4664 100%);
+}
+html.theme-male .next-shot {
+  background: linear-gradient(135deg, #FFFFFF 0%, #F3EEF6 40%, #E9EEF4 70%, #DCD8E8 100%);
+  color: #2F2B48;
+  border: 1px solid #DCD7E8;
+  box-shadow: 0 12px 26px -16px rgba(74, 70, 100, .55);
+}
+html.theme-male .next-shot .label-light { opacity: 1; color: #4A4664; }
+html.theme-male .next-shot .btn.light { background: linear-gradient(135deg, #77739A, #5E5A7A); color: #FFFFFF; }
+html.theme-male .next-shot .last-shot { color: #3A3556; }
+html.theme-male .wordmark { color: #5E5A7A; }
+html.theme-male .wordmark .wm-b { color: #A39FBA; }

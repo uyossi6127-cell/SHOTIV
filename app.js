@@ -67,6 +67,9 @@ function renderOnboarding() {
   mount('tpl-onboarding');
   const form = document.getElementById('onboarding-form');
   const errorEl = document.getElementById('onboarding-error');
+  form.querySelectorAll('input[name="gender"]').forEach((r) => {
+    r.addEventListener('change', () => applyTheme(r.value));
+  });
 
   form.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -575,6 +578,7 @@ function renderSettings(data) {
     r.addEventListener('change', () => {
       data.profile.gender = r.value;
       saveData(data);
+      applyTheme(r.value);
       toast('נשמר');
     });
   });
@@ -725,6 +729,15 @@ function downloadCalendar(data) {
   toast('פתח את הקובץ כדי להוסיף ליומן');
 }
 
+const THEME_COLORS = { female: '#9C5862', male: '#5E5A7A' };
+function applyTheme(gender) {
+  const root = document.documentElement;
+  root.classList.toggle('theme-female', gender === 'female');
+  root.classList.toggle('theme-male', gender === 'male');
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', THEME_COLORS[gender] || '#5B3FD9');
+}
+
 function applyTextSize() {
   document.documentElement.classList.toggle('text-large', localStorage.getItem('shotiv.textSize') === 'large');
 }
@@ -734,6 +747,7 @@ applyTextSize();
 function render() {
   const raw = loadData();
   const data = raw && raw.profile ? dedupeShots(raw) : raw;
+  applyTheme(data && data.profile ? data.profile.gender : null);
   if (!data || !data.profile) return renderOnboarding();
   const route = location.hash.replace('#', '');
   if (route === 'log') return renderLog(data);
