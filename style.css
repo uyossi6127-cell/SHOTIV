@@ -7,10 +7,10 @@
   --line: #CDD3CC;
   --accent: #A8525E;          /* זהב ורוד עמוק: טקסט ומסגרות */
   --accent-deep: #134A7A;     /* כחול פנינה עמוק: טקסט חזק */
-  --accent-soft: #F4EEF6;     /* רקע עדין משולב */
+  --accent-soft: #FCEBF2;     /* רקע עדין משולב */
   /* שילוב צבעי הדמויות: זהב ורוד של האישה + כחול פנינה של הגבר */
-  --blend: linear-gradient(120deg, #EDA8AE 0%, #F7C4C8 22%, #E9D6EA 48%, #A9D8F0 74%, #7DC0E8 100%);
-  --blend-deep: linear-gradient(120deg, #B35C68 0%, #A0607A 30%, #6F6E9E 55%, #2F86C4 80%, #1F6FAE 100%);
+  --blend: linear-gradient(120deg, #F57FA0 0%, #FFB3C7 22%, #F0D2F0 48%, #8FD0FF 74%, #45A8F5 100%);
+  --blend-deep: linear-gradient(120deg, #E8336F 0%, #D9447F 28%, #8A5FD6 52%, #2D8CF0 76%, #0866D9 100%);
   --green: #0E8A62;           /* ירוק: התקדמות ומשקל */
   --green-soft: #E2F5EC;
   --sky: #1F6FD1;             /* כחול: תזכורות וגיבוי */
@@ -275,8 +275,8 @@ a.btn { text-decoration: none; }
   inset: 0;
   z-index: 100;
   background:
-    radial-gradient(70% 45% at 50% 38%, rgba(255, 255, 255, .22) 0%, rgba(255, 255, 255, 0) 70%),
-    linear-gradient(160deg, #A8525E 0%, #9A5F7E 35%, #5F739F 65%, #1F6FAE 100%);
+    radial-gradient(70% 45% at 50% 38%, rgba(255, 255, 255, .16) 0%, rgba(255, 255, 255, 0) 70%),
+    linear-gradient(160deg, #E8336F 0%, #D44A86 30%, #6E6BDB 62%, #1E7FEA 85%, #0B63D1 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -344,7 +344,7 @@ a.btn { text-decoration: none; }
 
 /* שם המותג במסך הפתיחה: זהב ורוד שמתמזג לפנינה */
 .splash-word, .splash-word .wm-b {
-  background: linear-gradient(90deg, #FFFFFF 0%, #FDE3E7 25%, #F4BEC3 45%, #EAF7FE 70%, #A9D8F0 100%);
+  background: linear-gradient(90deg, #FFFFFF 0%, #FFE0EA 25%, #FFC2D4 45%, #E6F5FF 70%, #B5E0FF 100%);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
 }
@@ -367,7 +367,7 @@ a.btn { text-decoration: none; }
 .backup-nudge { border-color: var(--sky); }
 .backup-nudge strong { color: var(--sky); }
 .note { border-inline-start: 5px solid var(--coral); }
-.next-shot { background: var(--blend-deep); box-shadow: 0 10px 24px -14px rgba(111, 110, 158, .7); }
+.next-shot { background: var(--blend-deep); box-shadow: 0 10px 24px -14px rgba(138, 95, 214, .7); }
 .choice.suggested span::after { color: var(--coral); }
 
 /* התאמה לגילאי 40–60: טקסט גדול יותר, כפתורים גדולים, ניגודיות חזקה */
@@ -463,7 +463,7 @@ html.theme-female {
 html.theme-female .next-shot::after,
 html.theme-male .next-shot::after {
   content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, .35) 45%, transparent 60%);
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, .5) 45%, transparent 60%);
 }
 html.theme-female .feedback.up.g-female { background: linear-gradient(115deg, #FDE3E7, #F7C4C8 60%, #F2B8BE); color: #5E2531; border-color: #EDA8AE; }
 html.theme-female .feedback.up.g-female .feedback-icon { background: linear-gradient(135deg, #C46F7B, #A8525E); }
@@ -512,14 +512,14 @@ html.theme-male {
 .account .field input[type="email"] { text-align: left; }
 
 /* ---------- שילוב צבעי הדמויות (לפני בחירת מגדר: הרשמה ומסך הטיפול) ---------- */
-.btn.primary { background: var(--blend-deep); box-shadow: 0 10px 22px -14px rgba(95, 115, 159, .8); }
+.btn.primary { background: var(--blend-deep); box-shadow: 0 10px 22px -14px rgba(45, 140, 240, .75); }
 .toast { background: var(--blend-deep); }
 html body {
-  background: linear-gradient(170deg, #FFF4F5 0%, #F8F2F8 45%, #EEF6FC 100%) fixed;
+  background: linear-gradient(170deg, #FFEAF1 0%, #F6EEFB 45%, #E6F3FF 100%) fixed;
 }
 html .wordmark,
 html .wordmark .wm-b {
-  background: linear-gradient(90deg, #B35C68 0%, #C9707D 30%, #6F6E9E 62%, #1F6FAE 100%);
+  background: linear-gradient(90deg, #E8336F 0%, #E0508A 28%, #8A5FD6 55%, #1E7FEA 80%, #0866D9 100%);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
 }
@@ -534,18 +534,18 @@ html .field select:focus-visible { outline-color: #6F6E9E; }
 .next-shot {
   position: relative; overflow: hidden;
   background: linear-gradient(115deg,
-    #EDA8AE 0%, #F4BEC3 14%, #FDE3E7 26%, #F2C6D2 38%,
-    #D9D3EC 50%, #C3E3F5 62%, #EAF7FE 72%, #A9D8F0 84%, #7DC0E8 100%);
-  color: #2A2F4A;
-  border: 1px solid #E3CFE0;
-  box-shadow: 0 14px 28px -16px rgba(95, 115, 159, .6);
+    #F57FA0 0%, #FFA9C0 14%, #FFE3EC 25%, #FFB8CD 37%,
+    #D9C6F5 50%, #A8D9FF 62%, #E8F6FF 72%, #86C9FF 84%, #3D9EF2 100%);
+  color: #1A1F3D;
+  border: 1px solid rgba(255, 255, 255, .7);
+  box-shadow: 0 16px 30px -14px rgba(232, 51, 111, .45), 0 10px 24px -16px rgba(30, 127, 234, .55);
 }
 .next-shot::after {
   content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
-  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, .35) 45%, transparent 60%);
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, .5) 45%, transparent 60%);
 }
-.next-shot .label-light { opacity: 1; color: #4A3A5E; }
+.next-shot .label-light { opacity: 1; color: #3B2554; font-weight: 600; }
 .next-shot .btn.light { background: var(--blend-deep); color: #FFFFFF; }
-.next-shot .last-shot { color: #3A3550; }
+.next-shot .last-shot { color: #241F45; }
 .progress-fill { background: var(--blend-deep); }
 .card.progress-card { border-top: 5px solid transparent; background: linear-gradient(#FFFFFF, #FFFFFF) padding-box, var(--blend-deep) border-box; }

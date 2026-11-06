@@ -2,7 +2,7 @@
 'use strict';
 
 // ---------- שמירת נתונים (על המכשיר בלבד) ----------
-const APP_VERSION = '32';
+const APP_VERSION = '33';
 const STORAGE_KEY = 'shotiv.v1';
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
@@ -901,13 +901,13 @@ function downloadWeighCalendar(data) {
   });
 }
 
-const THEME_COLORS = { female: '#A8525E', male: '#A8525E' };
+const THEME_COLORS = { female: '#E8336F', male: '#E8336F' };
 function applyTheme(gender) {
   const root = document.documentElement;
   root.classList.toggle('theme-female', gender === 'female');
   root.classList.toggle('theme-male', gender === 'male');
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', THEME_COLORS[gender] || '#A8525E');
+  if (meta) meta.setAttribute('content', THEME_COLORS[gender] || '#E8336F');
 }
 
 function applyTextSize() {
