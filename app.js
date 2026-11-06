@@ -2,7 +2,7 @@
 'use strict';
 
 // ---------- שמירת נתונים (על המכשיר בלבד) ----------
-const APP_VERSION = '41';
+const APP_VERSION = '42';
 // כתובת לקבלת דיווחים על תוכן מסוכן. אפשר להחליף לכתובת ייעודית (למשל support@shotiv.co.il).
 const REPORT_EMAIL = 'uyossi6127@gmail.com';
 const STORAGE_KEY = 'shotiv.v1';
@@ -515,7 +515,15 @@ function renderHome(data) {
   $('[data-progress-text]').textContent = `${pct}% מהדרך ליעד`;
   requestAnimationFrame(() => { $('[data-progress-fill]').style.width = pct + '%'; });
 
-  $('[data-motivation]').textContent = motivation(data, pct);
+  const motiv = motivation(data, pct);
+  const motivEl = $('[data-motivation]');
+  motivEl.textContent = motiv;
+  motivEl.hidden = !motiv;
+  if (!data.shots.length) {
+    const hint = $('[data-first-hint]');
+    hint.hidden = false;
+    hint.textContent = g('הכול מוכן. אחרי הזריקה הראשונה, רשום אותה כאן ונתחיל לעקוב יחד.', 'הכול מוכן. אחרי הזריקה הראשונה, רשמי אותה כאן ונתחיל לעקוב יחד.');
+  }
   const gap = journalGap(data);
   if (gap) {
     $('[data-catchup-card]').hidden = false;
@@ -592,12 +600,13 @@ function renderHome(data) {
 
 function motivation(data, pct) {
   const change = data.weights.length ? latestChange(data) : null;
-  if (change !== null && change > 0) return `בשקילה האחרונה עלית ${formatKg(change)} ק"ג. זה קורה, ותנודות קטנות טבעיות. ממשיכים בשגרה.`;
-  if (change !== null && change < 0 && pct < 100) return `ירדת ${formatKg(-change)} ק"ג מאז השקילה הקודמת. כל הכבוד, ממשיכים ככה!`;
-  if (data.shots.length === 0) return g('ברוך הבא. כשתזריק, לחץ על "רשום זריקה" והספירה תתחיל.', 'ברוכה הבאה. כשתזריקי, לחצי על "רשמי זריקה" והספירה תתחיל.');
-  if (pct >= 100) return 'הגעת ליעד. עכשיו המטרה היא לשמור עליו.';
-  if (pct >= 50) return 'עברת את חצי הדרך. תמשיך באותו קצב.';
-  const count = data.shots.length === 1 ? 'נרשמה זריקה ראשונה' : `נרשמו ${data.shots.length} זריקות`;
+  if (data.shots.length === 0 && !data.weights.length) return '';
+  if (change !== null && change > 0) return `עלייה קטנה בשקילה האחרונה (${formatKg(change)} ק"ג). תנודות כאלה טבעיות, ממשיכים בשגרה.`;
+  if (change !== null && change < 0 && pct < 100) return `ירידה של ${formatKg(-change)} ק"ג מאז השקילה הקודמת. כל הכבוד!`;
+  if (pct >= 100) return 'הגעת ליעד 🎉 עכשיו שומרים עליו.';
+  if (pct >= 50) return 'עברת את חצי הדרך. ממשיכים באותו קצב.';
+  if (!data.shots.length) return '';
+  const count = data.shots.length === 1 ? 'הזריקה הראשונה מאחוריך' : `${data.shots.length} זריקות מאחוריך`;
   return `${count}. כל שבוע מקרב אותך ליעד.`;
 }
 

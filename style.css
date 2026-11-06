@@ -700,3 +700,10 @@ html.theme-male .wordmark .wm-b {
 .freq-row { display: grid; gap: 6px; padding: 10px 12px; border-radius: 14px; background: var(--accent-soft); }
 .freq-row strong { font-size: 17px; }
 .entry-list li.period { background: #FFFFFF; border: 2px dashed #D5D1E3; }
+
+/* ---------- משפט מוטיבציה: בתוך כרטיס ההתקדמות, נקי ועדין ---------- */
+.motivation { display: flex; gap: 10px; align-items: flex-start; margin: 4px 0 2px; padding: 12px 14px;
+  border-radius: 14px; background: var(--accent-soft); color: var(--accent-deep); font-size: 17px; font-weight: 600; line-height: 1.45; }
+.motivation::before { content: ""; flex: none; width: 8px; height: 8px; margin-top: 9px; border-radius: 50%; background: var(--accent); }
+.first-hint { margin: 2px 0 0; font-size: 17px; line-height: 1.45; font-weight: 600; opacity: .9; }
+.next-shot > * { position: relative; z-index: 1; }
