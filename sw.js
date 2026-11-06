@@ -1,12 +1,12 @@
 // © 2026 Yossi Ozan. All rights reserved. כל הזכויות שמורות.
 // Service Worker: שומר את קבצי האפליקציה כדי שתעבוד גם בלי אינטרנט.
 // בכל שינוי בקבצים מעלים את מספר הגרסה, כדי שהטלפון יוריד את החדשים.
-const CACHE = 'shotiv-v36';
+const CACHE = 'shotiv-v37';
 const FILES = [
   './',
   'index.html',
-  'style.css?v=36',
-  'app.js?v=36',
+  'style.css?v=37',
+  'app.js?v=37',
   'manifest.webmanifest',
   'icons/icon-192.png',
   'icons/icon-512.png',

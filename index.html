@@ -15,7 +15,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@100..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=36">
+  <link rel="stylesheet" href="style.css?v=37">
 </head>
 <body>
   <!-- מסך פתיחה מונפש -->
@@ -191,6 +191,11 @@
         <strong>כדאי לגבות את הנתונים</strong>
         <span data-backup-nudge-text></span>
       </a>
+
+      <a class="safety-link" href="#safety">
+        <span class="safety-ico" aria-hidden="true">🩺</span>
+        <span><strong>בטיחות ותמיכה</strong><br><span class="muted">מתי לפנות לרופא · כללי קהילה · דיווח</span></span>
+      </a>
     </section>
   </template>
 
@@ -300,6 +305,95 @@
   </template>
 
   <!-- הגדרות וגיבוי (S15) -->
+  <!-- בטיחות ותמיכה: מתי לפנות לרופא, כללי קהילה, דיווח על תוכן מסוכן -->
+  <template id="tpl-safety">
+    <section class="screen safety">
+      <header class="row-between">
+        <h1>בטיחות ותמיכה</h1>
+        <a class="btn ghost small" href="#home">חזרה</a>
+      </header>
+
+      <a class="emergency-bar" href="tel:101">
+        <strong>מצב חירום? חייג 101</strong>
+        <span>מגן דוד אדום, 24 שעות</span>
+      </a>
+
+      <article class="card doctor-check">
+        <h2>מתי לפנות לרופא</h2>
+        <p class="muted">סמן מה אתה מרגיש עכשיו. האפליקציה לא מאבחנת, אבל תגיד לך אם צריך עזרה.</p>
+        <div class="symptoms" data-symptoms>
+          <p class="sym-group">דחוף, לפנות מיד</p>
+          <label class="sym"><input type="checkbox" value="urgent"><span>כאב בטן חזק שלא עובר, לפעמים מקרין לגב</span></label>
+          <label class="sym"><input type="checkbox" value="urgent"><span>הקאות חוזרות, לא מצליח לשמור על נוזלים</span></label>
+          <label class="sym"><input type="checkbox" value="urgent"><span>נפיחות בפנים, בשפתיים או בגרון, או קושי לנשום</span></label>
+          <label class="sym"><input type="checkbox" value="urgent"><span>סחרחורת קשה, עילפון או בלבול</span></label>
+          <label class="sym"><input type="checkbox" value="urgent"><span>כאב בצד ימין עליון של הבטן עם חום או הצהבה של העור או העיניים</span></label>
+          <p class="sym-group">לפנות לרופא המטפל בהקדם</p>
+          <label class="sym"><input type="checkbox" value="doctor"><span>שלשול או עצירות שנמשכים יותר מכמה ימים</span></label>
+          <label class="sym"><input type="checkbox" value="doctor"><span>מעט מאוד שתן, צמא חזק, יובש בפה</span></label>
+          <label class="sym"><input type="checkbox" value="doctor"><span>גוש בצוואר, צרידות או קושי לבלוע</span></label>
+          <label class="sym"><input type="checkbox" value="doctor"><span>רעד, הזעה ורעב פתאומי (במיוחד אם אתה מטופל גם בתרופות לסוכרת)</span></label>
+          <label class="sym"><input type="checkbox" value="doctor"><span>שינוי בראייה</span></label>
+          <label class="sym"><input type="checkbox" value="doctor"><span>שכחתי זריקה ולא בטוח מה לעשות</span></label>
+          <p class="sym-group">מצב רוח</p>
+          <label class="sym"><input type="checkbox" value="mood"><span>מצב רוח ירוד מאוד, חרדה או מחשבות קשות</span></label>
+        </div>
+
+        <div class="advice urgent" data-advice="urgent" hidden role="alert">
+          <strong>צריך עזרה רפואית עכשיו</strong>
+          <p>אל תחכה לזריקה הבאה ואל תזריק עד שתדבר עם רופא. פנה למיון או חייג 101.</p>
+          <a class="btn danger" href="tel:101">חייג 101</a>
+        </div>
+        <div class="advice doctor" data-advice="doctor" hidden role="status">
+          <strong>כדאי לדבר עם הרופא המטפל בימים הקרובים</strong>
+          <p>ספר לו מה אתה מרגיש ומתי זה התחיל. אם המצב מחמיר, פנה למיון או חייג 101.</p>
+        </div>
+        <div class="advice mood" data-advice="mood" hidden role="status">
+          <strong>אתה לא לבד</strong>
+          <p>ער"ן, עזרה ראשונה נפשית, זמינים 24 שעות בטלפון 1201, באנונימיות. אפשר גם לפנות לרופא המשפחה.</p>
+          <a class="btn outline" href="tel:1201">חייג 1201</a>
+        </div>
+        <p class="muted small-text">המידע כאן כללי ואינו מחליף ייעוץ רפואי. בכל ספק, פנה לרופא או לרוקח.</p>
+      </article>
+
+      <article class="card rules">
+        <h2>כללי קהילה</h2>
+        <ol class="rules-list">
+          <li><strong>שומרים על כבוד.</strong> בלי לעג, הקטנה או הערות על גוף ומשקל של אחרים.</li>
+          <li><strong>לא נותנים הוראות רפואיות.</strong> אפשר לשתף חוויה אישית. מינון, הפסקה או החלפת תרופה מחליטים רק עם רופא.</li>
+          <li><strong>לא מוכרים ולא קונים תרופות.</strong> אסור להציע עטים, זריקות או "תחליפים" בלי מרשם.</li>
+          <li><strong>לא מעודדים דיאטה קיצונית.</strong> בלי צום ממושך, הקאות או "אתגרי" ירידה מהירה.</li>
+          <li><strong>שומרים על פרטיות.</strong> לא מפרסמים פרטים, תמונות או מידע רפואי של אחרים.</li>
+          <li><strong>מידע אמין בלבד.</strong> בלי שמועות ו"תרופות פלא". כשמשתפים מידע, מציינים מקור.</li>
+          <li><strong>רואים משהו מסוכן? מדווחים.</strong> הדיווח נבדק, והתוכן יוסר במקרה הצורך.</li>
+        </ol>
+      </article>
+
+      <form class="card report" id="report-form" novalidate>
+        <h2>דיווח על תוכן מסוכן</h2>
+        <p class="muted">ראית מידע מסוכן, הצעה למכירת תרופות או פגיעה במישהו? ספר לנו.</p>
+        <label class="field">סוג הבעיה
+          <select name="type" required>
+            <option value="">בחר…</option>
+            <option>מידע רפואי שגוי או מסוכן</option>
+            <option>מכירת תרופות בלי מרשם</option>
+            <option>עידוד דיאטה קיצונית או הפרעת אכילה</option>
+            <option>פגיעה, הטרדה או לעג</option>
+            <option>פגיעה בפרטיות</option>
+            <option>תקלה באפליקציה שעלולה לגרום נזק</option>
+            <option>אחר</option>
+          </select>
+        </label>
+        <label class="field">מה קרה?
+          <textarea name="details" rows="4" maxlength="1000" required placeholder="תאר בקצרה מה ראית ואיפה"></textarea>
+        </label>
+        <p class="error" data-report-error role="alert" hidden></p>
+        <p class="muted small-text">בלחיצה ייפתח המייל עם הדיווח מוכן לשליחה. אם מישהו בסכנה מיידית, חייג 101 או למשטרה 100.</p>
+        <button class="btn primary" type="submit">שליחת דיווח</button>
+      </form>
+    </section>
+  </template>
+
   <template id="tpl-settings">
     <section class="screen settings">
       <header class="row-between">
@@ -366,6 +460,11 @@
         <p class="error" data-restore-error role="alert" hidden></p>
       </article>
 
+      <a class="safety-link" href="#safety">
+        <span class="safety-ico" aria-hidden="true">🩺</span>
+        <span><strong>בטיחות ותמיכה</strong><br><span class="muted">מתי לפנות לרופא · כללי קהילה · דיווח</span></span>
+      </a>
+
       <article class="card danger-zone">
         <h2>מחיקת כל הנתונים</h2>
         <p class="muted small-text">מוחק את כל הזריקות, המשקל וההגדרות מהטלפון. אי אפשר לבטל. מומלץ לגבות לפני.</p>
@@ -407,6 +506,6 @@
     </form>
   </template>
 
-  <script src="app.js?v=36"></script>
+  <script src="app.js?v=37"></script>
 </body>
 </html>

@@ -588,3 +588,35 @@ html.theme-male .wordmark .wm-b {
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
 }
+
+/* ---------- בטיחות ותמיכה ---------- */
+.safety-link {
+  display: flex; gap: 14px; align-items: center;
+  padding: 16px 18px; border-radius: 20px; text-decoration: none; color: var(--ink);
+  background: #FFFFFF; border: 2px solid var(--accent-soft); font-size: 18px; line-height: 1.4;
+}
+.safety-ico { font-size: 30px; }
+.emergency-bar {
+  display: flex; flex-direction: column; gap: 2px; text-decoration: none;
+  background: #C8102E; color: #FFFFFF; border-radius: 18px; padding: 14px 18px;
+  box-shadow: 0 10px 20px -12px rgba(200, 16, 46, .8);
+}
+.emergency-bar strong { font-size: 22px; }
+.emergency-bar span { font-size: 16px; opacity: .92; }
+.symptoms { display: grid; gap: 8px; margin: 10px 0; }
+.sym-group { margin: 10px 0 2px; font-weight: 800; font-size: 17px; color: var(--accent-deep); }
+.sym { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 14px;
+  background: var(--accent-soft); font-size: 18px; line-height: 1.45; cursor: pointer; }
+.sym input { width: 26px; height: 26px; flex: none; margin-top: 2px; accent-color: var(--accent); }
+.sym:has(input:checked) { outline: 2px solid var(--accent); background: #FFFFFF; }
+.advice { border-radius: 16px; padding: 16px; margin: 12px 0; display: grid; gap: 8px; }
+.advice p { margin: 0; font-size: 18px; line-height: 1.5; }
+.advice strong { font-size: 20px; }
+.advice.urgent { background: #FDE7EA; border: 2px solid #C8102E; color: #6B0A19; }
+.advice.doctor { background: #FFF4E0; border: 2px solid #E08A00; color: #5A3600; }
+.advice.mood { background: #E8F5EE; border: 2px solid #0E8A62; color: #0B4A35; }
+.btn.danger { background: #C8102E; color: #FFFFFF; }
+.rules-list { margin: 8px 0 0; padding-inline-start: 24px; display: grid; gap: 10px; font-size: 18px; line-height: 1.5; }
+.field textarea { width: 100%; font: inherit; font-size: 18px; padding: 12px 14px; border-radius: 14px;
+  border: 2px solid #D9D6E6; background: #FFFFFF; resize: vertical; box-sizing: border-box; }
+.field textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }

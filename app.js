@@ -2,7 +2,9 @@
 'use strict';
 
 // ---------- שמירת נתונים (על המכשיר בלבד) ----------
-const APP_VERSION = '36';
+const APP_VERSION = '37';
+// כתובת לקבלת דיווחים על תוכן מסוכן. אפשר להחליף לכתובת ייעודית (למשל support@shotiv.co.il).
+const REPORT_EMAIL = 'uyossi6127@gmail.com';
 const STORAGE_KEY = 'shotiv.v1';
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
@@ -63,6 +65,39 @@ const app = document.getElementById('app');
 function mount(templateId) {
   const node = document.getElementById(templateId).content.cloneNode(true);
   app.replaceChildren(node);
+}
+
+
+// ---------- בטיחות ותמיכה ----------
+function renderSafety(data) {
+  mount('tpl-safety');
+  window.scrollTo(0, 0);
+  const box = app.querySelector('[data-symptoms]');
+  const show = () => {
+    const picked = new Set([...box.querySelectorAll('input:checked')].map((i) => i.value));
+    const urgent = picked.has('urgent');
+    app.querySelector('[data-advice="urgent"]').hidden = !urgent;
+    app.querySelector('[data-advice="doctor"]').hidden = urgent || !picked.has('doctor');
+    app.querySelector('[data-advice="mood"]').hidden = !picked.has('mood');
+    const first = app.querySelector('.advice:not([hidden])');
+    if (first) first.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  };
+  box.addEventListener('change', show);
+
+  const form = app.querySelector('#report-form');
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const err = form.querySelector('[data-report-error]');
+    const type = form.type.value;
+    const details = form.details.value.trim();
+    if (!type) { err.textContent = 'בחר את סוג הבעיה.'; err.hidden = false; return; }
+    if (details.length < 5) { err.textContent = 'כתוב בכמה מילים מה קרה.'; err.hidden = false; return; }
+    err.hidden = true;
+    const subject = `Shotiv · דיווח: ${type}`;
+    const body = `סוג: ${type}\n\nפירוט:\n${details}\n\n---\nגרסת אפליקציה: ${APP_VERSION}\nתאריך: ${new Date().toLocaleString('he-IL')}`;
+    location.href = `mailto:${REPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    toast('נפתח מייל עם הדיווח. לחץ "שלח" כדי לסיים.');
+  });
 }
 
 // ---------- הרשמה ----------
@@ -928,6 +963,7 @@ function render() {
   if (route === 'history') return renderHistory(data);
   if (route === 'settings') return renderSettings(data);
   if (route === 'weight') return renderWeight(data);
+  if (route === 'safety') return renderSafety(data);
   renderHome(data);
   window.scrollTo(0, 0);
 }
