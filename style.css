@@ -523,3 +523,11 @@ html.theme-male .wordmark .wm-b { color: #4FA3DA; }
   .chart-area, .chart-dot, .chart-bubble, .goal-tag { animation: none; opacity: 1; transform: none; }
   .chart-halo { animation: none; }
 }
+
+/* ---------- הרשמה ---------- */
+.register-head { text-align: center; padding-top: 8px; }
+.register-head .wordmark { font-size: 44px; margin: 0; }
+.register-head h2 { margin: 4px 0 0; font-size: 26px; }
+.register .field input[type="email"] { text-align: left; }
+.register-note { text-align: center; }
+.account .field input[type="email"] { text-align: left; }

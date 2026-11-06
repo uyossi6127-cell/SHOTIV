@@ -15,7 +15,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@100..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=29">
+  <link rel="stylesheet" href="style.css?v=30">
 </head>
 <body>
   <!-- מסך פתיחה מונפש -->
@@ -36,6 +36,33 @@
   <main id="app" aria-live="polite"></main>
 
   <!-- מסך הרשמה ראשונית (S1) -->
+  <!-- הרשמה: פרטי משתמש -->
+  <template id="tpl-register">
+    <form class="screen register" id="register-form" novalidate>
+      <header class="stack-sm register-head">
+        <h1 class="wordmark">Shot<span class="wm-b">iv</span></h1>
+        <h2 data-reg-title>יצירת חשבון</h2>
+        <p class="muted">כמה פרטים קצרים, ואז נכיר את הטיפול שלך.</p>
+      </header>
+
+      <label class="field">שם מלא
+        <input name="fullName" type="text" autocomplete="name" required placeholder="ישראל ישראלי" maxlength="60">
+      </label>
+      <label class="field">גיל
+        <input name="age" type="number" inputmode="numeric" min="18" max="120" step="1" required placeholder="50">
+      </label>
+      <label class="field">אימייל
+        <input name="email" type="email" inputmode="email" autocomplete="email" dir="ltr" required placeholder="name@example.com" maxlength="100">
+      </label>
+
+      <p class="muted small-text register-note">הפרטים נשמרים רק בטלפון שלך. לא שולחים אותם לשום מקום.</p>
+      <p class="error" id="register-error" role="alert" hidden></p>
+
+      <div class="spacer"></div>
+      <button class="btn primary" type="submit" data-reg-btn>הרשמה</button>
+    </form>
+  </template>
+
   <template id="tpl-onboarding">
     <form class="screen onboarding" id="onboarding-form" novalidate>
       <header class="stack-sm">
@@ -266,6 +293,22 @@
         <a class="btn ghost small" href="#home">חזרה</a>
       </header>
 
+      <form class="card account" id="account-form" novalidate>
+        <h2>פרטי החשבון</h2>
+        <label class="field">שם מלא
+          <input name="fullName" type="text" autocomplete="name" required maxlength="60">
+        </label>
+        <label class="field">גיל
+          <input name="age" type="number" inputmode="numeric" min="18" max="120" step="1" required>
+        </label>
+        <label class="field">אימייל
+          <input name="email" type="email" inputmode="email" autocomplete="email" dir="ltr" required maxlength="100">
+        </label>
+        <p class="error" data-account-error role="alert" hidden></p>
+        <p class="muted small-text" data-account-ok hidden>נשמר ✓</p>
+        <button class="btn outline" type="submit">שמירת פרטים</button>
+      </form>
+
       <article class="card reminder">
         <h2>תזכורות ביומן</h2>
         <p class="muted small-text">אירוע קבוע ביומן של הטלפון. היומן מתריע גם כשהאפליקציה סגורה.</p>
@@ -350,6 +393,6 @@
     </form>
   </template>
 
-  <script src="app.js?v=29"></script>
+  <script src="app.js?v=30"></script>
 </body>
 </html>

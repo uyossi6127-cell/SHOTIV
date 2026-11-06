@@ -2,7 +2,7 @@
 'use strict';
 
 // ---------- שמירת נתונים (על המכשיר בלבד) ----------
-const APP_VERSION = '29';
+const APP_VERSION = '30';
 const STORAGE_KEY = 'shotiv.v1';
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
@@ -65,6 +65,52 @@ function mount(templateId) {
   app.replaceChildren(node);
 }
 
+// ---------- הרשמה ----------
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+function readAccount(form) {
+  const f = new FormData(form);
+  return {
+    fullName: String(f.get('fullName') || '').trim().replace(/\s+/g, ' '),
+    age: Number(f.get('age')),
+    email: String(f.get('email') || '').trim().toLowerCase(),
+  };
+}
+
+function validateAccount(a) {
+  if (a.fullName.length < 2) return 'הזן שם מלא.';
+  if (!a.fullName.includes(' ')) return 'הזן שם פרטי ושם משפחה.';
+  if (!Number.isInteger(a.age) || a.age < 18 || a.age > 120) return 'הזן גיל בין 18 ל-120.';
+  if (!EMAIL_RE.test(a.email)) return 'כתובת האימייל לא תקינה. לדוגמה: name@example.com';
+  return null;
+}
+
+function firstName(data) {
+  const n = data && data.account && data.account.fullName;
+  return n ? n.split(' ')[0] : '';
+}
+
+function renderRegister(data) {
+  mount('tpl-register');
+  const form = document.getElementById('register-form');
+  const errorEl = document.getElementById('register-error');
+  const existing = !!(data && data.profile);
+  if (existing) {
+    form.querySelector('[data-reg-title]').textContent = 'השלמת פרטים';
+    form.querySelector('[data-reg-btn]').textContent = 'שמור והמשך';
+  }
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const account = readAccount(form);
+    const problem = validateAccount(account);
+    if (problem) { errorEl.textContent = problem; errorEl.hidden = false; return; }
+    account.createdAt = new Date().toISOString();
+    const next = Object.assign({ version: 1 }, data || {}, { account });
+    saveData(next);
+    render();
+  });
+}
+
 function renderOnboarding() {
   mount('tpl-onboarding');
   const form = document.getElementById('onboarding-form');
@@ -94,7 +140,8 @@ function renderOnboarding() {
       return;
     }
 
-    saveData({ version: 1, profile, shots: [], weights: [] });
+    const prev = loadData() || {};
+    saveData({ version: 1, account: prev.account, profile, shots: [], weights: [] });
     render();
   });
 }
@@ -115,7 +162,8 @@ function renderHome(data) {
   const $ = (sel) => app.querySelector(sel);
   const { profile } = data;
 
-  $('[data-greeting]').textContent = greeting() + ',';
+  const name = firstName(data);
+  $('[data-greeting]').textContent = greeting() + (name ? ` ${name},` : ',');
 
   const next = nextShotDate(data);
   const days = daysUntil(next);
@@ -644,6 +692,27 @@ function renderSettings(data) {
   mount('tpl-settings');
   const $ = (sel) => app.querySelector(sel);
 
+  const accForm = $('#account-form');
+  if (accForm && data.account) {
+    accForm.fullName.value = data.account.fullName || '';
+    accForm.age.value = data.account.age || '';
+    accForm.email.value = data.account.email || '';
+    accForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const err = accForm.querySelector('[data-account-error]');
+      const ok = accForm.querySelector('[data-account-ok]');
+      const a = readAccount(accForm);
+      const problem = validateAccount(a);
+      ok.hidden = true;
+      if (problem) { err.textContent = problem; err.hidden = false; return; }
+      err.hidden = true;
+      const fresh = loadData();
+      fresh.account = Object.assign({}, fresh.account, a);
+      saveData(fresh);
+      ok.hidden = false;
+    });
+  }
+
   // תזכורות ביומן
   $('[data-cal-shot-text]').textContent = `כל יום ${DAY_NAMES[data.profile.shotDay]} בשעה ${data.profile.shotTime}`;
   $('[data-cal-weight-text]').textContent = `כל יום ${DAY_NAMES[weighReminderDate(data).getDay()]} בשעה 08:00, בבוקר שאחרי הזריקה`;
@@ -704,6 +773,7 @@ function renderSettings(data) {
         return showError(errorEl, 'זה לא קובץ גיבוי של Shotiv.');
       }
       restored.weights = Array.isArray(restored.weights) ? restored.weights : [];
+      if (!restored.account && data.account) restored.account = data.account;
       const n = restored.shots.length;
       const msg = `לשחזר גיבוי מ-${new Date(parsed.exportedAt).toLocaleDateString('he-IL')} עם ${n} זריקות? הנתונים הנוכחיים יוחלפו.`;
       if (!window.confirm(msg)) return;
@@ -850,7 +920,8 @@ function render() {
   const raw = loadData();
   const data = raw && raw.profile ? dedupeShots(raw) : raw;
   applyTheme(data && data.profile ? data.profile.gender : null);
-  if (!data || !data.profile) return renderOnboarding();
+  if (!data || !data.account) return renderRegister(data);
+  if (!data.profile) return renderOnboarding();
   const route = location.hash.replace('#', '');
   if (route === 'log') return renderLog(data);
   if (route === 'dose') return renderDose(data);
