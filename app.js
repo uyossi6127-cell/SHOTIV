@@ -2,7 +2,7 @@
 'use strict';
 
 // ---------- שמירת נתונים (על המכשיר בלבד) ----------
-const APP_VERSION = '39';
+const APP_VERSION = '40';
 // כתובת לקבלת דיווחים על תוכן מסוכן. אפשר להחליף לכתובת ייעודית (למשל support@shotiv.co.il).
 const REPORT_EMAIL = 'uyossi6127@gmail.com';
 const STORAGE_KEY = 'shotiv.v1';
@@ -97,7 +97,7 @@ function drawMoodTrend(svg, entries) {
   const el = (tag, attrs) => { const n = document.createElementNS(ns, tag); Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v)); return n; };
   svg.replaceChildren();
   const defs = el('defs', {});
-  const lg = el('linearGradient', { id: 'mt-grad', x1: '0', y1: '0', x2: '0', y2: '1' });
+  const lg = el('linearGradient', { id: 'mt-grad', gradientUnits: 'userSpaceOnUse', x1: '0', y1: String(top), x2: '0', y2: String(H - bottom) });
   [[0, '#159A6E'], [.5, '#E8A82E'], [1, '#D93A4A']].forEach(([o, c]) => lg.appendChild(el('stop', { offset: o, 'stop-color': c })));
   defs.appendChild(lg); svg.appendChild(defs);
   for (let m = 1; m <= 5; m++) svg.appendChild(el('line', { x1: padX, x2: W - padX, y1: y(m), y2: y(m), stroke: '#E6E3EF', 'stroke-width': 1 }));
@@ -105,7 +105,9 @@ function drawMoodTrend(svg, entries) {
     const d = pts.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(p.mood).toFixed(1)}`).join(' ');
     svg.appendChild(el('path', { d, fill: 'none', stroke: 'url(#mt-grad)', 'stroke-width': 3.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
   }
-  pts.forEach((p, i) => svg.appendChild(el('circle', { cx: x(i), cy: y(p.mood), r: 6, fill: MOOD_COLORS[p.mood], stroke: '#FFFFFF', 'stroke-width': 2.5 })));
+  pts.forEach((p, i) => svg.appendChild(p.type === 'period'
+    ? el('circle', { cx: x(i), cy: y(p.mood), r: 6, fill: '#FFFFFF', stroke: MOOD_COLORS[p.mood], 'stroke-width': 3, 'stroke-dasharray': '3 2' })
+    : el('circle', { cx: x(i), cy: y(p.mood), r: 6, fill: MOOD_COLORS[p.mood], stroke: '#FFFFFF', 'stroke-width': 2.5 })));
 }
 const dayKey = (d) => { const x = new Date(d); return `${x.getFullYear()}-${x.getMonth() + 1}-${x.getDate()}`; };
 
@@ -214,13 +216,145 @@ function renderJournal(data) {
       const [emoji, label] = MOODS[en.mood] || ['', ''];
       li.innerHTML = '<span class="e-meter"></span><div><strong></strong><p class="muted small-text"></p><p class="e-note"></p></div>';
       li.querySelector('.e-meter').appendChild(miniMeter(en.mood));
-      li.querySelector('strong').textContent = `${relativeDay(en.date)} · ${label}`;
-      li.querySelector('.muted').textContent = en.effects && en.effects.length ? en.effects.join(' · ') : 'בלי תופעות לוואי';
+      if (en.type === 'period') {
+        li.classList.add('period');
+        li.querySelector('strong').textContent = `סיכום ${shortDate(en.from)} עד ${shortDate(en.to)} · ${label}`;
+        li.querySelector('.muted').textContent = en.effects && en.effects.length
+          ? en.effects.map((x) => `${x} (${FREQ[(en.effectFreq || {})[x]] || ''})`).join(' · ')
+          : 'בלי תופעות לוואי';
+      } else {
+        li.querySelector('strong').textContent = `${relativeDay(en.date)} · ${label}`;
+        li.querySelector('.muted').textContent = en.effects && en.effects.length ? en.effects.join(' · ') : 'בלי תופעות לוואי';
+      }
       const noteEl = li.querySelector('.e-note');
       if (en.note) noteEl.textContent = en.note; else noteEl.remove();
       ul.appendChild(li);
     });
   }
+}
+
+
+// ---------- סיכום תקופה (ימים שלא עודכנו) ----------
+const FREQ = { few: 'יום-יומיים', half: 'חצי מהזמן', most: 'כמעט כל יום' };
+const entryEnd = (e) => new Date(e.type === 'period' ? e.to : e.date);
+
+// מחזיר את הפער: מהיום שאחרי הרישום האחרון ועד אתמול. null אם אין פער של 3+ ימים.
+function journalGap(data) {
+  const journal = data.journal || [];
+  if (!journal.length) return null;
+  const last = journal.reduce((m, e) => (entryEnd(e) > m ? entryEnd(e) : m), new Date(0));
+  const from = new Date(startOfDay(last).getTime() + DAY_MS);
+  const to = new Date(startOfDay(new Date()).getTime() - DAY_MS);
+  const days = Math.round((to - from) / DAY_MS) + 1;
+  if (days < 3) return null;
+  return { from, to, days, tooLong: days > 30 };
+}
+
+function missedShotDays(data, from, to) {
+  const out = [];
+  for (let d = new Date(from); d <= to; d = new Date(d.getTime() + DAY_MS)) {
+    if (d.getDay() !== Number(data.profile.shotDay)) continue;
+    const near = data.shots.some((s) => Math.abs(startOfDay(new Date(s.date)) - startOfDay(d)) <= 3 * DAY_MS);
+    if (!near) out.push(new Date(d));
+  }
+  return out;
+}
+
+const shortDate = (d) => new Date(d).toLocaleDateString('he-IL', { day: 'numeric', month: 'numeric' });
+
+function renderCatchup(data) {
+  const gap = journalGap(data);
+  if (!gap) { location.hash = '#journal'; return; }
+  mount('tpl-catchup');
+  window.scrollTo(0, 0);
+  const $ = (sel) => app.querySelector(sel);
+  const form = $('#catchup-form');
+  const from = gap.tooLong ? new Date(gap.to.getTime() - 29 * DAY_MS) : gap.from;
+  const days = gap.tooLong ? 30 : gap.days;
+  $('[data-catchup-intro]').textContent = gap.tooLong
+    ? `עברו ${gap.days} ימים. נסכם את 30 הימים האחרונים (${shortDate(from)} עד ${shortDate(gap.to)}), ומהיום ממשיכים כרגיל.`
+    : `${days} ימים בלי עדכון (${shortDate(from)} עד ${shortDate(gap.to)}). זה קורה. ${g('ספר', 'ספרי')} בקצרה איך היו.`;
+
+  // זריקות שלא נרשמו
+  const missed = missedShotDays(data, from, gap.to);
+  if (missed.length) {
+    $('[data-missed-shots]').hidden = false;
+    const list = $('[data-missed-list]');
+    missed.forEach((d, i) => {
+      const row = document.createElement('fieldset');
+      row.className = 'missed-row';
+      row.innerHTML = `<legend></legend><div class="seg">
+        <label><input type="radio" name="shot${i}" value="yes"><span>כן</span></label>
+        <label><input type="radio" name="shot${i}" value="no"><span>לא</span></label>
+        <label><input type="radio" name="shot${i}" value="unsure"><span>לא זוכר</span></label></div>`;
+      row.querySelector('legend').textContent = `${g('הזרקת', 'הזרקת')} ב${relativeDay(d)}?`;
+      if (GENDER === 'female') row.querySelector('input[value=unsure] + span').textContent = 'לא זוכרת';
+      row.dataset.date = d.toISOString();
+      list.appendChild(row);
+    });
+  }
+
+  // תדירות לכל תופעה שנבחרה
+  const effectsBox = $('[data-catchup-effects]');
+  const freqList = $('[data-freq-list]');
+  const syncFreq = () => {
+    const picked = [...effectsBox.querySelectorAll('input:checked')].map((i) => i.value);
+    [...freqList.children].forEach((row) => { if (!picked.includes(row.dataset.effect)) row.remove(); });
+    picked.forEach((ef) => {
+      if (freqList.querySelector(`[data-effect="${ef}"]`)) return;
+      const row = document.createElement('div');
+      row.className = 'freq-row';
+      row.dataset.effect = ef;
+      const nm = `f_${ef.replace(/\s/g, '_')}`;
+      row.innerHTML = `<strong></strong><div class="seg">${Object.entries(FREQ).map(([k, v], idx) =>
+        `<label><input type="radio" name="${nm}" value="${k}"${idx === 0 ? ' checked' : ''}><span>${v}</span></label>`).join('')}</div>`;
+      row.querySelector('strong').textContent = ef;
+      freqList.appendChild(row);
+    });
+  };
+  effectsBox.addEventListener('change', syncFreq);
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const err = $('[data-catchup-error]');
+    const moodInput = form.querySelector('input[name=mood]:checked');
+    if (!moodInput) { err.textContent = g('בחר איך הרגשת באופן כללי.', 'בחרי איך הרגשת באופן כללי.'); err.hidden = false; return; }
+    const kgRaw = form.kg.value.trim();
+    const kg = kgRaw ? Number(kgRaw.replace(',', '.')) : null;
+    if (kg !== null && !(kg >= 30 && kg <= 300)) { err.textContent = g('הזן משקל בין 30 ל-300 ק"ג, או השאר ריק.', 'הזיני משקל בין 30 ל-300 ק"ג, או השאירי ריק.'); err.hidden = false; return; }
+    err.hidden = true;
+
+    const fresh = loadData();
+    fresh.journal = fresh.journal || [];
+    const effectFreq = {};
+    [...freqList.children].forEach((row) => { effectFreq[row.dataset.effect] = row.querySelector('input:checked').value; });
+    fresh.journal.push({
+      id: Date.now(), type: 'period', from: from.toISOString(), to: gap.to.toISOString(), date: gap.to.toISOString(),
+      mood: Number(moodInput.value), effects: Object.keys(effectFreq), effectFreq, note: form.note.value.trim(),
+    });
+    let addedShots = 0;
+    $('[data-missed-list]').querySelectorAll('.missed-row').forEach((row) => {
+      const ans = row.querySelector('input:checked');
+      if (ans && ans.value === 'yes') {
+        const d = new Date(row.dataset.date);
+        const [hh, mm] = String(fresh.profile.shotTime || '20:00').split(':').map(Number);
+        d.setHours(hh || 20, mm || 0, 0, 0);
+        fresh.shots.push({ date: d.toISOString(), dose: fresh.profile.dose, site: '', backfilled: true });
+        addedShots++;
+      }
+    });
+    fresh.shots.sort((a, b) => new Date(a.date) - new Date(b.date));
+    if (kg !== null) {
+      fresh.weights = fresh.weights.filter((w) => daysUntil(w.date) !== 0);
+      fresh.weights.push({ date: new Date().toISOString(), kg });
+      fresh.weights.sort((a, b) => new Date(a.date) - new Date(b.date));
+    }
+    const q = form.question.value.trim();
+    if (q) { fresh.questions = fresh.questions || []; fresh.questions.push({ id: Date.now() + 1, date: new Date().toISOString(), text: q, done: false }); }
+    saveData(fresh);
+    toast(addedShots === 1 ? 'הסיכום נשמר, ונוספה זריקה אחת' : addedShots > 1 ? `הסיכום נשמר, ונוספו ${addedShots} זריקות` : 'הסיכום נשמר. ממשיכים מהיום 👍');
+    location.hash = '#journal';
+  });
 }
 
 // ---------- בטיחות ותמיכה ----------
@@ -382,6 +516,13 @@ function renderHome(data) {
   requestAnimationFrame(() => { $('[data-progress-fill]').style.width = pct + '%'; });
 
   $('[data-motivation]').textContent = motivation(data, pct);
+  const gap = journalGap(data);
+  if (gap) {
+    $('[data-catchup-card]').hidden = false;
+    $('[data-catchup-title]').textContent = gap.tooLong
+      ? `${g('לא היית', 'לא היית')} פה ${gap.days} ימים. ${g('ברוך השב', 'ברוכה השבה')} 🙂`
+      : `${gap.days} ימים בלי עדכון. זה קורה 🙂 איך היו הימים האלה?`;
+  }
   const jt = journalToday(data);
   const jStatus = $('[data-journal-status]');
   if (jt) {
@@ -1131,6 +1272,7 @@ function render() {
   if (route === 'weight') return renderWeight(data);
   if (route === 'safety') return renderSafety(data);
   if (route === 'journal') return renderJournal(data);
+  if (route === 'catchup') return renderCatchup(data);
   renderHome(data);
   window.scrollTo(0, 0);
 }

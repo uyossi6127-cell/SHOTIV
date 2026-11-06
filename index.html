@@ -15,7 +15,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@100..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=39">
+  <link rel="stylesheet" href="style.css?v=40">
 </head>
 <body>
   <!-- מסך פתיחה מונפש -->
@@ -145,6 +145,11 @@
         </div>
         <a class="btn ghost small" href="#settings">הגדרות</a>
       </header>
+
+      <a class="catchup-card" href="#catchup" data-catchup-card hidden>
+        <strong data-catchup-title></strong>
+        <span data-f="לחצי כאן לסיכום קצר של התקופה. לוקח דקה.">לחץ כאן לסיכום קצר של התקופה. לוקח דקה.</span>
+      </a>
 
       <article class="card next-shot">
         <span class="label-light">הזריקה הבאה</span>
@@ -395,6 +400,62 @@
     </section>
   </template>
 
+  <!-- סיכום תקופה: השלמה לימים שלא עודכנו -->
+  <template id="tpl-catchup">
+    <section class="screen catchup">
+      <header class="row-between">
+        <h1>סיכום הימים האחרונים</h1>
+        <a class="btn ghost small" href="#home">חזרה</a>
+      </header>
+      <p class="muted" data-catchup-intro></p>
+
+      <form class="card stack" id="catchup-form" novalidate>
+        <article class="stack-sm" data-missed-shots hidden>
+          <h2>זריקות בתקופה הזו</h2>
+          <div class="missed-list" data-missed-list></div>
+        </article>
+
+        <h2>איך הרגשת בימים האלה, באופן כללי?</h2>
+        <div class="moods meter" role="radiogroup" aria-label="הרגשה כללית">
+          <label class="mood m1"><input type="radio" name="mood" value="1"><span><i class="bar"></i><em>קשה מאוד</em></span></label>
+          <label class="mood m2"><input type="radio" name="mood" value="2"><span><i class="bar"></i><em>קשה</em></span></label>
+          <label class="mood m3"><input type="radio" name="mood" value="3"><span><i class="bar"></i><em>ככה ככה</em></span></label>
+          <label class="mood m4"><input type="radio" name="mood" value="4"><span><i class="bar"></i><em>טוב</em></span></label>
+          <label class="mood m5"><input type="radio" name="mood" value="5"><span><i class="bar"></i><em>טוב מאוד</em></span></label>
+        </div>
+
+        <h3>אילו תופעות לוואי היו?</h3>
+        <div class="chips" data-catchup-effects>
+          <label class="chip"><input type="checkbox" value="בחילה"><span>בחילה</span></label>
+          <label class="chip"><input type="checkbox" value="הקאות"><span>הקאות</span></label>
+          <label class="chip"><input type="checkbox" value="שלשול"><span>שלשול</span></label>
+          <label class="chip"><input type="checkbox" value="עצירות"><span>עצירות</span></label>
+          <label class="chip"><input type="checkbox" value="גזים וגרפסים"><span>גזים וגרפסים</span></label>
+          <label class="chip"><input type="checkbox" value="צרבת"><span>צרבת</span></label>
+          <label class="chip"><input type="checkbox" value="כאב בטן"><span>כאב בטן</span></label>
+          <label class="chip"><input type="checkbox" value="עייפות"><span>עייפות</span></label>
+          <label class="chip"><input type="checkbox" value="כאב ראש"><span>כאב ראש</span></label>
+          <label class="chip"><input type="checkbox" value="סחרחורת"><span>סחרחורת</span></label>
+          <label class="chip"><input type="checkbox" value="חוסר תיאבון"><span>חוסר תיאבון</span></label>
+        </div>
+        <div class="freq-list" data-freq-list></div>
+
+        <label class="field">משקל היום (לא חובה)
+          <input name="kg" type="number" inputmode="decimal" step="0.1" min="30" max="300" placeholder='ק"ג'>
+        </label>
+        <label class="field"><span data-f="משהו שחשוב לך לזכור מהתקופה?">משהו שחשוב לך לזכור מהתקופה?</span>
+          <textarea name="note" rows="3" maxlength="1000" placeholder="מה עבר עליך, מה עזר, מה היה קשה"></textarea>
+        </label>
+        <label class="field">שאלה לרופא (לא חובה)
+          <input name="question" type="text" maxlength="200">
+        </label>
+        <p class="muted small-text">סיכום תקופה נשמר כ"זיכרון" ולא כתיעוד יומי, וכך גם יסומן בדוח לרופא.</p>
+        <p class="error" data-catchup-error role="alert" hidden></p>
+        <button class="btn primary" type="submit">שמירת הסיכום</button>
+      </form>
+    </section>
+  </template>
+
   <template id="tpl-safety">
     <section class="screen safety">
       <header class="row-between">
@@ -595,6 +656,6 @@
     </form>
   </template>
 
-  <script src="app.js?v=39"></script>
+  <script src="app.js?v=40"></script>
 </body>
 </html>

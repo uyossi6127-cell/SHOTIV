@@ -681,3 +681,20 @@ html.theme-male .wordmark .wm-b {
 .mini-meter i { display: block; width: 6px; border-radius: 3px; background: #DAD7E5; }
 .e-meter { flex: none; padding-top: 2px; }
 .mood-trend { margin: 6px 0 4px; padding: 12px; border-radius: 16px; background: #FFFFFF; border: 1px solid #ECE9F4; }
+
+/* ---------- סיכום תקופה ---------- */
+.catchup-card { display: grid; gap: 4px; padding: 16px 18px; border-radius: 20px; text-decoration: none;
+  background: linear-gradient(120deg, #FFF6E5, #FFFFFF); border: 2px solid #F2B33D; color: #5A3600; font-size: 17px; }
+.catchup-card strong { font-size: 20px; color: #3F2600; }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; }
+.seg input { position: absolute; opacity: 0; pointer-events: none; }
+.seg span { display: block; text-align: center; padding: 10px 4px; border-radius: 12px; background: #FFFFFF;
+  border: 2px solid #DAD6E8; font-size: 16px; font-weight: 600; cursor: pointer; }
+.seg input:checked + span { background: var(--accent); border-color: var(--accent); color: #FFFFFF; }
+.seg input:focus-visible + span { outline: 3px solid var(--accent); outline-offset: 2px; }
+.missed-row { border: 0; margin: 0; padding: 12px; border-radius: 14px; background: var(--accent-soft); display: grid; gap: 8px; }
+.missed-row legend { float: right; width: 100%; font-weight: 700; font-size: 18px; padding: 0; margin-bottom: 8px; }
+.missed-list, .freq-list { display: grid; gap: 10px; }
+.freq-row { display: grid; gap: 6px; padding: 10px 12px; border-radius: 14px; background: var(--accent-soft); }
+.freq-row strong { font-size: 17px; }
+.entry-list li.period { background: #FFFFFF; border: 2px dashed #D5D1E3; }
