@@ -15,7 +15,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@100..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=37">
+  <link rel="stylesheet" href="style.css?v=38">
 </head>
 <body>
   <!-- מסך פתיחה מונפש -->
@@ -150,7 +150,7 @@
         <span class="label-light">הזריקה הבאה</span>
         <p class="countdown"><strong data-days></strong> <span data-days-word></span></p>
         <p data-shot-meta></p>
-        <button class="btn light" type="button" data-action="log-shot">רשום זריקה</button>
+        <button class="btn light" type="button" data-action="log-shot" data-f="רשמי זריקה">רשום זריקה</button>
         <a class="last-shot" href="#history" data-last-shot hidden></a>
       </article>
 
@@ -159,7 +159,7 @@
           <h2>תזכורת שבועית</h2>
           <p class="muted small-text" data-reminder-text></p>
         </div>
-        <button class="btn outline" type="button" data-action="add-calendar">הוסף ליומן בטלפון</button>
+        <button class="btn outline" type="button" data-action="add-calendar" data-f="הוסיפי ליומן בטלפון">הוסף ליומן בטלפון</button>
         <button class="link-btn" type="button" data-action="calendar-done">כבר הוספתי</button>
       </article>
 
@@ -181,6 +181,21 @@
       </article>
 
       <p class="note" data-motivation></p>
+
+      <article class="card journal-card">
+        <div class="row-between">
+          <h2>איך הרגשת היום?</h2>
+          <a class="small-link" href="#journal">יומן</a>
+        </div>
+        <div class="quick-moods" data-quick-moods>
+          <a href="#journal?mood=5" aria-label="טוב מאוד">😄</a>
+          <a href="#journal?mood=4" aria-label="טוב">🙂</a>
+          <a href="#journal?mood=3" aria-label="ככה ככה">😐</a>
+          <a href="#journal?mood=2" aria-label="קשה">😕</a>
+          <a href="#journal?mood=1" aria-label="קשה מאוד">😣</a>
+        </div>
+        <p class="muted small-text" data-journal-status></p>
+      </article>
 
       <a class="weigh-nudge" href="#weight" data-weigh-nudge hidden>
         <strong>הגיע הזמן להישקל</strong>
@@ -306,6 +321,76 @@
 
   <!-- הגדרות וגיבוי (S15) -->
   <!-- בטיחות ותמיכה: מתי לפנות לרופא, כללי קהילה, דיווח על תוכן מסוכן -->
+  <!-- יומן אישי: הרגשה, תופעות לוואי, שאלות לרופא -->
+  <template id="tpl-journal">
+    <section class="screen journal">
+      <header class="row-between">
+        <h1>יומן אישי</h1>
+        <a class="btn ghost small" href="#home">חזרה</a>
+      </header>
+      <p class="muted">🔒 היומן פרטי. נשמר רק בטלפון שלך.</p>
+
+      <form class="card stack" id="journal-form" novalidate>
+        <h2 data-journal-title>איך הרגשת היום?</h2>
+        <div class="moods" role="radiogroup" aria-label="הרגשה">
+          <label class="mood"><input type="radio" name="mood" value="5"><span><b>😄</b>טוב מאוד</span></label>
+          <label class="mood"><input type="radio" name="mood" value="4"><span><b>🙂</b>טוב</span></label>
+          <label class="mood"><input type="radio" name="mood" value="3"><span><b>😐</b>ככה ככה</span></label>
+          <label class="mood"><input type="radio" name="mood" value="2"><span><b>😕</b>קשה</span></label>
+          <label class="mood"><input type="radio" name="mood" value="1"><span><b>😣</b>קשה מאוד</span></label>
+        </div>
+
+        <h3>תופעות לוואי היום</h3>
+        <div class="chips" data-effects>
+          <label class="chip"><input type="checkbox" value="בחילה"><span>בחילה</span></label>
+          <label class="chip"><input type="checkbox" value="הקאות"><span>הקאות</span></label>
+          <label class="chip"><input type="checkbox" value="שלשול"><span>שלשול</span></label>
+          <label class="chip"><input type="checkbox" value="עצירות"><span>עצירות</span></label>
+          <label class="chip"><input type="checkbox" value="גזים וגרפסים"><span>גזים וגרפסים</span></label>
+          <label class="chip"><input type="checkbox" value="צרבת"><span>צרבת</span></label>
+          <label class="chip"><input type="checkbox" value="כאב בטן"><span>כאב בטן</span></label>
+          <label class="chip"><input type="checkbox" value="עייפות"><span>עייפות</span></label>
+          <label class="chip"><input type="checkbox" value="כאב ראש"><span>כאב ראש</span></label>
+          <label class="chip"><input type="checkbox" value="סחרחורת"><span>סחרחורת</span></label>
+          <label class="chip"><input type="checkbox" value="חוסר תיאבון"><span>חוסר תיאבון</span></label>
+          <label class="chip none"><input type="checkbox" value="none" data-no-effects><span>בלי תופעות ✓</span></label>
+        </div>
+
+        <label class="field"><span data-f="מה תרצי לתעד?">מה תרצה לתעד?</span>
+          <textarea name="note" rows="3" maxlength="1000" placeholder="מחשבות, הרגלים, מה עזר לך היום"></textarea>
+        </label>
+        <label class="field">שאלה לרופא (לא חובה)
+          <input name="question" type="text" maxlength="200" placeholder="למשל: האם לשנות את שעת הזריקה?">
+        </label>
+        <p class="error" data-journal-error role="alert" hidden></p>
+        <button class="btn primary" type="submit" data-journal-save data-f="שמירה ביומן">שמירה ביומן</button>
+      </form>
+
+      <div class="advice urgent" data-journal-alert hidden role="alert">
+        <strong data-f="שימי לב לתסמינים">שים לב לתסמינים</strong>
+        <p data-f="הקאות או כאב בטן חזק יחד עם הרגשה קשה מאוד יכולים לדרוש בדיקה. אם זה לא עובר, פני לרופא.">הקאות או כאב בטן חזק יחד עם הרגשה קשה מאוד יכולים לדרוש בדיקה. אם זה לא עובר, פנה לרופא.</p>
+        <a class="btn danger" href="#safety">מתי לפנות לרופא</a>
+      </div>
+      <div class="advice mood" data-journal-mood hidden role="status">
+        <strong data-f="את לא לבד" data-f="את לא לבד">אתה לא לבד</strong>
+        <p>ימים קשים קורים. ער"ן, עזרה ראשונה נפשית, זמינים 24 שעות בטלפון 1201, באנונימיות.</p>
+        <a class="btn outline" href="tel:1201" data-f="חייגי 1201" data-f="חייגי 1201">חייג 1201</a>
+      </div>
+
+      <article class="card" data-questions-card hidden>
+        <h2>שאלות לרופא</h2>
+        <p class="muted small-text" data-f="סמני שאלה אחרי ששאלת אותה.">סמן שאלה אחרי ששאלת אותה.</p>
+        <ul class="q-list" data-questions></ul>
+      </article>
+
+      <article class="card" data-entries-card hidden>
+        <h2>מה רשמתי לאחרונה</h2>
+        <p class="muted small-text" data-effects-summary></p>
+        <ul class="entry-list" data-entries></ul>
+      </article>
+    </section>
+  </template>
+
   <template id="tpl-safety">
     <section class="screen safety">
       <header class="row-between">
@@ -314,13 +399,13 @@
       </header>
 
       <a class="emergency-bar" href="tel:101">
-        <strong>מצב חירום? חייג 101</strong>
+        <strong data-f="מצב חירום? חייגי 101">מצב חירום? חייג 101</strong>
         <span>מגן דוד אדום, 24 שעות</span>
       </a>
 
       <article class="card doctor-check">
         <h2>מתי לפנות לרופא</h2>
-        <p class="muted">סמן מה אתה מרגיש עכשיו. האפליקציה לא מאבחנת, אבל תגיד לך אם צריך עזרה.</p>
+        <p class="muted" data-f="סמני מה את מרגישה עכשיו. האפליקציה לא מאבחנת, אבל תגיד לך אם צריך עזרה.">סמן מה אתה מרגיש עכשיו. האפליקציה לא מאבחנת, אבל תגיד לך אם צריך עזרה.</p>
         <div class="symptoms" data-symptoms>
           <p class="sym-group">דחוף, לפנות מיד</p>
           <label class="sym"><input type="checkbox" value="urgent"><span>כאב בטן חזק שלא עובר, לפעמים מקרין לגב</span></label>
@@ -332,28 +417,28 @@
           <label class="sym"><input type="checkbox" value="doctor"><span>שלשול או עצירות שנמשכים יותר מכמה ימים</span></label>
           <label class="sym"><input type="checkbox" value="doctor"><span>מעט מאוד שתן, צמא חזק, יובש בפה</span></label>
           <label class="sym"><input type="checkbox" value="doctor"><span>גוש בצוואר, צרידות או קושי לבלוע</span></label>
-          <label class="sym"><input type="checkbox" value="doctor"><span>רעד, הזעה ורעב פתאומי (במיוחד אם אתה מטופל גם בתרופות לסוכרת)</span></label>
+          <label class="sym"><input type="checkbox" value="doctor"><span data-f="רעד, הזעה ורעב פתאומי (במיוחד אם את מטופלת גם בתרופות לסוכרת)">רעד, הזעה ורעב פתאומי (במיוחד אם אתה מטופל גם בתרופות לסוכרת)</span></label>
           <label class="sym"><input type="checkbox" value="doctor"><span>שינוי בראייה</span></label>
-          <label class="sym"><input type="checkbox" value="doctor"><span>שכחתי זריקה ולא בטוח מה לעשות</span></label>
+          <label class="sym"><input type="checkbox" value="doctor"><span data-f="שכחתי זריקה ולא בטוחה מה לעשות">שכחתי זריקה ולא בטוח מה לעשות</span></label>
           <p class="sym-group">מצב רוח</p>
           <label class="sym"><input type="checkbox" value="mood"><span>מצב רוח ירוד מאוד, חרדה או מחשבות קשות</span></label>
         </div>
 
         <div class="advice urgent" data-advice="urgent" hidden role="alert">
           <strong>צריך עזרה רפואית עכשיו</strong>
-          <p>אל תחכה לזריקה הבאה ואל תזריק עד שתדבר עם רופא. פנה למיון או חייג 101.</p>
-          <a class="btn danger" href="tel:101">חייג 101</a>
+          <p data-f="אל תחכי לזריקה הבאה ואל תזריקי עד שתדברי עם רופא. פני למיון או חייגי 101.">אל תחכה לזריקה הבאה ואל תזריק עד שתדבר עם רופא. פנה למיון או חייג 101.</p>
+          <a class="btn danger" href="tel:101" data-f="חייגי 101">חייג 101</a>
         </div>
         <div class="advice doctor" data-advice="doctor" hidden role="status">
           <strong>כדאי לדבר עם הרופא המטפל בימים הקרובים</strong>
-          <p>ספר לו מה אתה מרגיש ומתי זה התחיל. אם המצב מחמיר, פנה למיון או חייג 101.</p>
+          <p data-f="ספרי לו מה את מרגישה ומתי זה התחיל. אם המצב מחמיר, פני למיון או חייגי 101.">ספר לו מה אתה מרגיש ומתי זה התחיל. אם המצב מחמיר, פנה למיון או חייג 101.</p>
         </div>
         <div class="advice mood" data-advice="mood" hidden role="status">
-          <strong>אתה לא לבד</strong>
+          <strong data-f="את לא לבד">אתה לא לבד</strong>
           <p>ער"ן, עזרה ראשונה נפשית, זמינים 24 שעות בטלפון 1201, באנונימיות. אפשר גם לפנות לרופא המשפחה.</p>
-          <a class="btn outline" href="tel:1201">חייג 1201</a>
+          <a class="btn outline" href="tel:1201" data-f="חייגי 1201">חייג 1201</a>
         </div>
-        <p class="muted small-text">המידע כאן כללי ואינו מחליף ייעוץ רפואי. בכל ספק, פנה לרופא או לרוקח.</p>
+        <p class="muted small-text" data-f="המידע כאן כללי ואינו מחליף ייעוץ רפואי. בכל ספק, פני לרופא או לרוקח.">המידע כאן כללי ואינו מחליף ייעוץ רפואי. בכל ספק, פנה לרופא או לרוקח.</p>
       </article>
 
       <article class="card rules">
@@ -371,10 +456,10 @@
 
       <form class="card report" id="report-form" novalidate>
         <h2>דיווח על תוכן מסוכן</h2>
-        <p class="muted">ראית מידע מסוכן, הצעה למכירת תרופות או פגיעה במישהו? ספר לנו.</p>
+        <p class="muted" data-f="ראית מידע מסוכן, הצעה למכירת תרופות או פגיעה במישהו? ספרי לנו.">ראית מידע מסוכן, הצעה למכירת תרופות או פגיעה במישהו? ספר לנו.</p>
         <label class="field">סוג הבעיה
           <select name="type" required>
-            <option value="">בחר…</option>
+            <option value="" data-f="בחרי…">בחר…</option>
             <option>מידע רפואי שגוי או מסוכן</option>
             <option>מכירת תרופות בלי מרשם</option>
             <option>עידוד דיאטה קיצונית או הפרעת אכילה</option>
@@ -388,7 +473,7 @@
           <textarea name="details" rows="4" maxlength="1000" required placeholder="תאר בקצרה מה ראית ואיפה"></textarea>
         </label>
         <p class="error" data-report-error role="alert" hidden></p>
-        <p class="muted small-text">בלחיצה ייפתח המייל עם הדיווח מוכן לשליחה. אם מישהו בסכנה מיידית, חייג 101 או למשטרה 100.</p>
+        <p class="muted small-text" data-f="בלחיצה ייפתח המייל עם הדיווח מוכן לשליחה. אם מישהו בסכנה מיידית, חייגי 101 או למשטרה 100.">בלחיצה ייפתח המייל עם הדיווח מוכן לשליחה. אם מישהו בסכנה מיידית, חייג 101 או למשטרה 100.</p>
         <button class="btn primary" type="submit">שליחת דיווח</button>
       </form>
     </section>
@@ -446,9 +531,9 @@
 
       <article class="card">
         <h2>גיבוי הנתונים</h2>
-        <p class="muted small-text">הנתונים שמורים רק בטלפון הזה. גבה אותם לקובץ ושמור אותו בוואטסאפ, במייל או ב-Drive. אם תחליף טלפון, תוכל לשחזר מהקובץ.</p>
+        <p class="muted small-text" data-f="הנתונים שמורים רק בטלפון הזה. גבי אותם לקובץ ושמרי אותו בוואטסאפ, במייל או ב-Drive. אם תחליפי טלפון, תוכלי לשחזר מהקובץ.">הנתונים שמורים רק בטלפון הזה. גבה אותם לקובץ ושמור אותו בוואטסאפ, במייל או ב-Drive. אם תחליף טלפון, תוכל לשחזר מהקובץ.</p>
         <p class="small-text" data-last-backup></p>
-        <button class="btn primary" type="button" data-action="backup">גבה עכשיו</button>
+        <button class="btn primary" type="button" data-action="backup" data-f="גבי עכשיו">גבה עכשיו</button>
       </article>
 
       <article class="card">
@@ -468,7 +553,7 @@
       <article class="card danger-zone">
         <h2>מחיקת כל הנתונים</h2>
         <p class="muted small-text">מוחק את כל הזריקות, המשקל וההגדרות מהטלפון. אי אפשר לבטל. מומלץ לגבות לפני.</p>
-        <button class="btn danger" type="button" data-action="reset">מחק הכל והתחל מחדש</button>
+        <button class="btn danger" type="button" data-action="reset" data-f="מחקי הכל והתחילי מחדש">מחק הכל והתחל מחדש</button>
       </article>
 
       <p class="muted small-text version" data-version></p>
@@ -483,7 +568,7 @@
         <h1>שינוי מינון</h1>
         <a class="btn ghost small" href="#log">חזרה</a>
       </header>
-      <p class="note">עדכן כאן רק מינון שהרופא קבע. האפליקציה לא ממליצה על מינון.</p>
+      <p class="note" data-f="עדכני כאן רק מינון שהרופא קבע. האפליקציה לא ממליצה על מינון.">עדכן כאן רק מינון שהרופא קבע. האפליקציה לא ממליצה על מינון.</p>
 
       <article class="card">
         <span class="muted">המינון הנוכחי</span>
@@ -506,6 +591,6 @@
     </form>
   </template>
 
-  <script src="app.js?v=37"></script>
+  <script src="app.js?v=38"></script>
 </body>
 </html>

@@ -2,7 +2,7 @@
 'use strict';
 
 // ---------- שמירת נתונים (על המכשיר בלבד) ----------
-const APP_VERSION = '37';
+const APP_VERSION = '38';
 // כתובת לקבלת דיווחים על תוכן מסוכן. אפשר להחליף לכתובת ייעודית (למשל support@shotiv.co.il).
 const REPORT_EMAIL = 'uyossi6127@gmail.com';
 const STORAGE_KEY = 'shotiv.v1';
@@ -62,11 +62,130 @@ function greeting(now = new Date()) {
 // ---------- מסכים ----------
 const app = document.getElementById('app');
 
+// פנייה לפי מגדר: g('טקסט לגבר', 'טקסט לאישה')
+let GENDER = null;
+const g = (m, f) => (GENDER === 'female' ? f : m);
+
 function mount(templateId) {
   const node = document.getElementById(templateId).content.cloneNode(true);
+  if (GENDER === 'female') node.querySelectorAll('[data-f]').forEach((el) => { el.textContent = el.dataset.f; });
   app.replaceChildren(node);
 }
 
+
+
+// ---------- יומן אישי (הרגשה, תופעות לוואי, שאלות לרופא) ----------
+const MOODS = { 5: ['😄', 'טוב מאוד'], 4: ['🙂', 'טוב'], 3: ['😐', 'ככה ככה'], 2: ['😕', 'קשה'], 1: ['😣', 'קשה מאוד'] };
+const dayKey = (d) => { const x = new Date(d); return `${x.getFullYear()}-${x.getMonth() + 1}-${x.getDate()}`; };
+
+function journalToday(data) {
+  const key = dayKey(new Date());
+  return (data.journal || []).find((e) => dayKey(e.date) === key) || null;
+}
+
+function effectsSummary(journal, days = 30) {
+  const since = Date.now() - days * 86400000;
+  const counts = {};
+  journal.filter((e) => new Date(e.date).getTime() >= since)
+    .forEach((e) => (e.effects || []).forEach((x) => { counts[x] = (counts[x] || 0) + 1; }));
+  const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  return top.length ? `נפוץ ב-30 הימים האחרונים: ${top.map(([k, n]) => `${k} ×${n}`).join(' · ')}` : '';
+}
+
+function renderJournal(data) {
+  mount('tpl-journal');
+  window.scrollTo(0, 0);
+  const $ = (sel) => app.querySelector(sel);
+  const form = $('#journal-form');
+  const effectsBox = $('[data-effects]');
+  const noneBox = $('[data-no-effects]');
+  const today = journalToday(data);
+
+  // מילוי מראש: רשומה של היום, או הרגשה שנבחרה במסך הבית
+  const preMood = new URLSearchParams(location.hash.split('?')[1] || '').get('mood');
+  if (today) {
+    $('[data-journal-title]').textContent = 'עדכון היומן של היום';
+    form.querySelector(`input[name=mood][value="${today.mood}"]`).checked = true;
+    (today.effects || []).forEach((x) => { const i = effectsBox.querySelector(`input[value="${x}"]`); if (i) i.checked = true; });
+    if (today.effects && today.effects.length === 0) noneBox.checked = true;
+    form.note.value = today.note || '';
+  }
+  if (preMood && MOODS[preMood]) form.querySelector(`input[name=mood][value="${preMood}"]`).checked = true;
+
+  // "בלי תופעות" מבטל את השאר, ולהפך
+  effectsBox.addEventListener('change', (e) => {
+    if (e.target === noneBox && noneBox.checked) effectsBox.querySelectorAll('input:not([data-no-effects])').forEach((i) => { i.checked = false; });
+    else if (e.target !== noneBox && e.target.checked) noneBox.checked = false;
+  });
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const err = $('[data-journal-error]');
+    const moodInput = form.querySelector('input[name=mood]:checked');
+    if (!moodInput) { err.textContent = g('בחר איך הרגשת היום.', 'בחרי איך הרגשת היום.'); err.hidden = false; return; }
+    err.hidden = true;
+    const effects = [...effectsBox.querySelectorAll('input:checked:not([data-no-effects])')].map((i) => i.value);
+    const fresh = loadData();
+    fresh.journal = fresh.journal || [];
+    const existing = journalToday(fresh);
+    const entry = existing || { id: Date.now(), date: new Date().toISOString() };
+    entry.mood = Number(moodInput.value);
+    entry.effects = effects;
+    entry.note = form.note.value.trim();
+    if (!existing) fresh.journal.push(entry);
+    const q = form.question.value.trim();
+    if (q) { fresh.questions = fresh.questions || []; fresh.questions.push({ id: Date.now(), date: new Date().toISOString(), text: q, done: false }); }
+    saveData(fresh);
+    toast(existing ? 'היומן עודכן' : 'נשמר ביומן');
+    renderJournal(fresh);
+    // התראות בטיחות אחרי שמירה
+    const severe = entry.mood <= 2 && (effects.includes('הקאות') || effects.includes('כאב בטן'));
+    app.querySelector('[data-journal-alert]').hidden = !severe;
+    app.querySelector('[data-journal-mood]').hidden = entry.mood !== 1;
+    const shown = app.querySelector('.advice:not([hidden])');
+    if (shown) shown.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+
+  // שאלות פתוחות לרופא
+  const questions = (data.questions || []).filter((q) => !q.done);
+  if (questions.length) {
+    $('[data-questions-card]').hidden = false;
+    const ul = $('[data-questions]');
+    questions.forEach((q) => {
+      const li = document.createElement('li');
+      li.innerHTML = '<label class="q-item"><input type="checkbox"><span></span></label>';
+      li.querySelector('span').textContent = q.text;
+      li.querySelector('input').addEventListener('change', () => {
+        const fresh = loadData();
+        const item = (fresh.questions || []).find((x) => x.id === q.id);
+        if (item) item.done = true;
+        saveData(fresh);
+        li.classList.add('done');
+        setTimeout(() => li.remove(), 500);
+      });
+      ul.appendChild(li);
+    });
+  }
+
+  // רשומות אחרונות
+  const entries = (data.journal || []).slice().sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 10);
+  if (entries.length) {
+    $('[data-entries-card]').hidden = false;
+    $('[data-effects-summary]').textContent = effectsSummary(data.journal);
+    const ul = $('[data-entries]');
+    entries.forEach((en) => {
+      const li = document.createElement('li');
+      const [emoji, label] = MOODS[en.mood] || ['', ''];
+      li.innerHTML = '<span class="e-emoji"></span><div><strong></strong><p class="muted small-text"></p><p class="e-note"></p></div>';
+      li.querySelector('.e-emoji').textContent = emoji;
+      li.querySelector('strong').textContent = `${relativeDay(en.date)} · ${label}`;
+      li.querySelector('.muted').textContent = en.effects && en.effects.length ? en.effects.join(' · ') : 'בלי תופעות לוואי';
+      const noteEl = li.querySelector('.e-note');
+      if (en.note) noteEl.textContent = en.note; else noteEl.remove();
+      ul.appendChild(li);
+    });
+  }
+}
 
 // ---------- בטיחות ותמיכה ----------
 function renderSafety(data) {
@@ -90,13 +209,13 @@ function renderSafety(data) {
     const err = form.querySelector('[data-report-error]');
     const type = form.type.value;
     const details = form.details.value.trim();
-    if (!type) { err.textContent = 'בחר את סוג הבעיה.'; err.hidden = false; return; }
-    if (details.length < 5) { err.textContent = 'כתוב בכמה מילים מה קרה.'; err.hidden = false; return; }
+    if (!type) { err.textContent = g('בחר את סוג הבעיה.', 'בחרי את סוג הבעיה.'); err.hidden = false; return; }
+    if (details.length < 5) { err.textContent = g('כתוב בכמה מילים מה קרה.', 'כתבי בכמה מילים מה קרה.'); err.hidden = false; return; }
     err.hidden = true;
     const subject = `Shotiv · דיווח: ${type}`;
     const body = `סוג: ${type}\n\nפירוט:\n${details}\n\n---\nגרסת אפליקציה: ${APP_VERSION}\nתאריך: ${new Date().toLocaleString('he-IL')}`;
     location.href = `mailto:${REPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    toast('נפתח מייל עם הדיווח. לחץ "שלח" כדי לסיים.');
+    toast(g('נפתח מייל עם הדיווח. לחץ "שלח" כדי לסיים.', 'נפתח מייל עם הדיווח. לחצי "שלח" כדי לסיים.'));
   });
 }
 
@@ -227,6 +346,16 @@ function renderHome(data) {
   requestAnimationFrame(() => { $('[data-progress-fill]').style.width = pct + '%'; });
 
   $('[data-motivation]').textContent = motivation(data, pct);
+  const jt = journalToday(data);
+  const jStatus = $('[data-journal-status]');
+  if (jt) {
+    const [emoji, label] = MOODS[jt.mood];
+    jStatus.textContent = `היום רשמת: ${emoji} ${label}${jt.effects && jt.effects.length ? ' · ' + jt.effects.join(', ') : ''}`;
+    const sel = $(`[data-quick-moods] a[href$="mood=${jt.mood}"]`);
+    if (sel) sel.classList.add('on');
+  } else {
+    jStatus.textContent = g('לחיצה אחת, ואפשר להוסיף תופעות לוואי ושאלות לרופא.', 'לחיצה אחת, ואפשר להוסיף תופעות לוואי ושאלות לרופא.');
+  }
 
   const logBtn = $('[data-action="log-shot"]');
   const lastShot = data.shots[data.shots.length - 1];
@@ -271,8 +400,8 @@ function renderHome(data) {
   if (sinceWeigh >= 7) {
     $('[data-weigh-nudge]').hidden = false;
     $('[data-weigh-nudge-text]').textContent = data.weights.length
-      ? `השקילה האחרונה הייתה לפני ${sinceWeigh} ימים. לחץ כאן לעדכון.`
-      : 'עוד לא עדכנת משקל מאז ההרשמה. לחץ כאן לעדכון.';
+      ? `השקילה האחרונה הייתה לפני ${sinceWeigh} ימים. ${g('לחץ', 'לחצי')} כאן לעדכון.`
+      : g('עוד לא עדכנת משקל מאז ההרשמה. לחץ כאן לעדכון.', 'עוד לא עדכנת משקל מאז ההרשמה. לחצי כאן לעדכון.');
   }
 
   // תזכורת לגבות (S15): אחרי שיש נתונים שחבל לאבד, ואם לא גיבו 30 יום.
@@ -290,7 +419,7 @@ function motivation(data, pct) {
   const change = data.weights.length ? latestChange(data) : null;
   if (change !== null && change > 0) return `בשקילה האחרונה עלית ${formatKg(change)} ק"ג. זה קורה, ותנודות קטנות טבעיות. ממשיכים בשגרה.`;
   if (change !== null && change < 0 && pct < 100) return `ירדת ${formatKg(-change)} ק"ג מאז השקילה הקודמת. כל הכבוד, ממשיכים ככה!`;
-  if (data.shots.length === 0) return 'ברוך הבא. כשתזריק, לחץ על "רשום זריקה" והספירה תתחיל.';
+  if (data.shots.length === 0) return g('ברוך הבא. כשתזריק, לחץ על "רשום זריקה" והספירה תתחיל.', 'ברוכה הבאה. כשתזריקי, לחצי על "רשמי זריקה" והספירה תתחיל.');
   if (pct >= 100) return 'הגעת ליעד. עכשיו המטרה היא לשמור עליו.';
   if (pct >= 50) return 'עברת את חצי הדרך. תמשיך באותו קצב.';
   const count = data.shots.length === 1 ? 'נרשמה זריקה ראשונה' : `נרשמו ${data.shots.length} זריקות`;
@@ -378,7 +507,7 @@ function renderLog(data) {
     const when = form.elements.when.value;
     const date = when === 'today' ? new Date() : new Date(dateInput.value + 'T12:00:00');
 
-    if (isNaN(date)) return showError(errorEl, 'בחר תאריך.');
+    if (isNaN(date)) return showError(errorEl, g('בחר תאריך.', 'בחרי תאריך.'));
     if (daysUntil(date) > 0) return showError(errorEl, 'אי אפשר לרשום זריקה בתאריך עתידי.');
     if (data.shots.some((s) => daysUntil(s.date, date) === 0)) {
       return showError(errorEl, 'כבר נרשמה זריקה בתאריך הזה.');
@@ -681,7 +810,7 @@ function renderWeight(data, justSaved = false) {
 
   $('[data-action="save-weight"]').addEventListener('click', () => {
     const kg = Math.round(Number(input.value) * 10) / 10;
-    if (!(kg >= 30 && kg <= 300)) return showError(errorEl, 'הזן משקל בין 30 ל-300 ק"ג.');
+    if (!(kg >= 30 && kg <= 300)) return showError(errorEl, g('הזן משקל בין 30 ל-300 ק"ג.', 'הזיני משקל בין 30 ל-300 ק"ג.'));
     data.weights = data.weights.filter((w) => daysUntil(w.date) !== 0);
     data.weights.push({ date: new Date().toISOString(), kg });
     data.weights.sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -860,7 +989,7 @@ function renderDose(data) {
   form.addEventListener('submit', (event) => {
     event.preventDefault();
     const dose = Number(form.elements.dose.value);
-    if (!(dose > 0)) return showError(errorEl, 'הזן את המינון החדש שהרופא קבע.');
+    if (!(dose > 0)) return showError(errorEl, g('הזן את המינון החדש שהרופא קבע.', 'הזיני את המינון החדש שהרופא קבע.'));
     if (dose === profile.dose) return showError(errorEl, 'זה המינון הנוכחי.');
     profile.dose = dose;
     data.doseHistory.push({ date: new Date().toISOString(), dose });
@@ -919,7 +1048,7 @@ function downloadCalendar(data) {
     uid: 'shotiv-shot',
     start: icsStamp(nextWeekday(profile.shotDay), hh, mm),
     summary: `זריקת ${profile.med} – Shotiv`,
-    description: 'זמן לזריקה השבועית. אחרי הזריקה רשום אותה באפליקציה.',
+    description: g('זמן לזריקה השבועית. אחרי הזריקה רשום אותה באפליקציה.', 'זמן לזריקה השבועית. אחרי הזריקה רשמי אותה באפליקציה.'),
   });
 }
 
@@ -932,12 +1061,13 @@ function downloadWeighCalendar(data) {
     uid: 'shotiv-weigh',
     start: icsStamp(weighReminderDate(data), '08', '00'),
     summary: 'שקילה שבועית – Shotiv',
-    description: 'בוקר, לפני ארוחה. עדכן את המשקל באפליקציה כדי לראות את ההתקדמות.',
+    description: g('בוקר, לפני ארוחה. עדכן את המשקל באפליקציה כדי לראות את ההתקדמות.', 'בוקר, לפני ארוחה. עדכני את המשקל באפליקציה כדי לראות את ההתקדמות.'),
   });
 }
 
 const THEME_COLORS = { female: '#D9405F', male: '#1A7FE8' };
 function applyTheme(gender) {
+  GENDER = gender || null;
   const root = document.documentElement;
   root.classList.toggle('theme-female', gender === 'female');
   root.classList.toggle('theme-male', gender === 'male');
@@ -957,13 +1087,14 @@ function render() {
   applyTheme(data && data.profile ? data.profile.gender : null);
   if (!data || !data.account) return renderRegister(data);
   if (!data.profile) return renderOnboarding();
-  const route = location.hash.replace('#', '');
+  const route = location.hash.replace('#', '').split('?')[0];
   if (route === 'log') return renderLog(data);
   if (route === 'dose') return renderDose(data);
   if (route === 'history') return renderHistory(data);
   if (route === 'settings') return renderSettings(data);
   if (route === 'weight') return renderWeight(data);
   if (route === 'safety') return renderSafety(data);
+  if (route === 'journal') return renderJournal(data);
   renderHome(data);
   window.scrollTo(0, 0);
 }
