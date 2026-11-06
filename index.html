@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#E8336F">
-  <meta name="description" content="Shotiv – מעקב זריקות, משקל ותופעות לוואי למטופלי תרופות הרזיה">
+  <meta name="description" content="Shotiv – מעקב טיפולים, משקל ותופעות לוואי למטופלי תרופות הרזיה">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Shotiv">
@@ -15,7 +15,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@100..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=42">
+  <link rel="stylesheet" href="style.css?v=43">
 </head>
 <body>
   <!-- מסך פתיחה מונפש -->
@@ -105,7 +105,7 @@
         <label class="field">מינון נוכחי (מ"ג)
           <input name="dose" type="number" inputmode="decimal" step="0.25" min="0" required placeholder="5">
         </label>
-        <label class="field">יום הזריקה
+        <label class="field">יום הטיפול
           <select name="shotDay" required>
             <option value="0">ראשון</option>
             <option value="1">שני</option>
@@ -124,7 +124,7 @@
         </label>
       </div>
 
-      <label class="field">שעת תזכורת ביום הזריקה
+      <label class="field">שעת תזכורת ביום הטיפול
         <input name="shotTime" type="time" value="20:00" required>
       </label>
 
@@ -152,10 +152,10 @@
       </a>
 
       <article class="card next-shot">
-        <span class="label-light">הזריקה הבאה</span>
+        <span class="label-light">הטיפול הבא</span>
         <p class="countdown"><strong data-days></strong> <span data-days-word></span></p>
         <p data-shot-meta></p>
-        <button class="btn light" type="button" data-action="log-shot" data-f="רשמי זריקה">רשום זריקה</button>
+        <button class="btn light" type="button" data-action="log-shot" >רישום טיפול</button>
         <a class="last-shot" href="#history" data-last-shot hidden></a>
         <p class="first-hint" data-first-hint hidden></p>
       </article>
@@ -224,7 +224,7 @@
   <template id="tpl-log">
     <form class="screen log" id="log-form" novalidate>
       <header class="row-between">
-        <h1>רישום זריקה</h1>
+        <h1>רישום טיפול</h1>
         <a class="btn ghost small" href="#home">חזרה</a>
       </header>
 
@@ -243,15 +243,15 @@
           <label class="choice"><input type="radio" name="when" value="today" checked><span>היום</span></label>
           <label class="choice"><input type="radio" name="when" value="other"><span>תאריך אחר</span></label>
         </div>
-        <label class="field" data-other-date hidden>תאריך הזריקה
+        <label class="field" data-other-date hidden>תאריך הטיפול
           <input type="date" name="date">
         </label>
       </fieldset>
 
       <fieldset class="card">
-        <legend class="sr-only">אזור ההזרקה</legend>
+        <legend class="sr-only">אזור בגוף</legend>
         <div class="row-between">
-          <span class="muted" aria-hidden="true">אזור ההזרקה</span>
+          <span class="muted" aria-hidden="true">אזור בגוף</span>
           <span class="muted small-text" data-last-site></span>
         </div>
         <div class="choice-grid two" data-sites></div>
@@ -260,7 +260,7 @@
 
       <p class="error" id="log-error" role="alert" hidden></p>
       <div class="spacer"></div>
-      <button class="btn primary" type="submit">שמור זריקה</button>
+      <button class="btn primary" type="submit">שמירת הטיפול</button>
     </form>
   </template>
 
@@ -268,12 +268,12 @@
   <template id="tpl-history">
     <section class="screen history-screen">
       <header class="row-between">
-        <h1>היסטוריית זריקות</h1>
+        <h1>היסטוריית טיפולים</h1>
         <a class="btn ghost small" href="#home">חזרה</a>
       </header>
       <p class="muted" data-history-summary></p>
       <ul class="shot-list" data-shot-list></ul>
-      <p class="note" data-history-empty hidden>עדיין לא נרשמו זריקות.</p>
+      <p class="note" data-history-empty hidden>עדיין לא נרשמו טיפולים.</p>
     </section>
   </template>
 
@@ -366,7 +366,7 @@
           <textarea name="note" rows="3" maxlength="1000" placeholder="מחשבות, הרגלים, מה עזר לך היום"></textarea>
         </label>
         <label class="field">שאלה לרופא (לא חובה)
-          <input name="question" type="text" maxlength="200" placeholder="למשל: האם לשנות את שעת הזריקה?">
+          <input name="question" type="text" maxlength="200" placeholder="למשל: האם לשנות את שעת הטיפול?">
         </label>
         <p class="error" data-journal-error role="alert" hidden></p>
         <button class="btn primary" type="submit" data-journal-save data-f="שמירה ביומן">שמירה ביומן</button>
@@ -412,7 +412,7 @@
 
       <form class="card stack" id="catchup-form" novalidate>
         <article class="stack-sm" data-missed-shots hidden>
-          <h2>זריקות בתקופה הזו</h2>
+          <h2>טיפולים בתקופה הזו</h2>
           <div class="missed-list" data-missed-list></div>
         </article>
 
@@ -485,14 +485,14 @@
           <label class="sym"><input type="checkbox" value="doctor"><span>גוש בצוואר, צרידות או קושי לבלוע</span></label>
           <label class="sym"><input type="checkbox" value="doctor"><span data-f="רעד, הזעה ורעב פתאומי (במיוחד אם את מטופלת גם בתרופות לסוכרת)">רעד, הזעה ורעב פתאומי (במיוחד אם אתה מטופל גם בתרופות לסוכרת)</span></label>
           <label class="sym"><input type="checkbox" value="doctor"><span>שינוי בראייה</span></label>
-          <label class="sym"><input type="checkbox" value="doctor"><span data-f="שכחתי זריקה ולא בטוחה מה לעשות">שכחתי זריקה ולא בטוח מה לעשות</span></label>
+          <label class="sym"><input type="checkbox" value="doctor"><span data-f="שכחתי טיפול ולא בטוחה מה לעשות">שכחתי טיפול ולא בטוח מה לעשות</span></label>
           <p class="sym-group">מצב רוח</p>
           <label class="sym"><input type="checkbox" value="mood"><span>מצב רוח ירוד מאוד, חרדה או מחשבות קשות</span></label>
         </div>
 
         <div class="advice urgent" data-advice="urgent" hidden role="alert">
           <strong>צריך עזרה רפואית עכשיו</strong>
-          <p data-f="אל תחכי לזריקה הבאה ואל תזריקי עד שתדברי עם רופא. פני למיון או חייגי 101.">אל תחכה לזריקה הבאה ואל תזריק עד שתדבר עם רופא. פנה למיון או חייג 101.</p>
+          <p data-f="אל תחכי לטיפול הבא ואל תיקחי אותו עד שתדברי עם רופא. פני למיון או חייגי 101.">אל תחכה לטיפול הבא ואל תיקח אותו עד שתדבר עם רופא. פנה למיון או חייג 101.</p>
           <a class="btn danger" href="tel:101" data-f="חייגי 101">חייג 101</a>
         </div>
         <div class="advice doctor" data-advice="doctor" hidden role="status">
@@ -512,7 +512,7 @@
         <ol class="rules-list">
           <li><strong>שומרים על כבוד.</strong> בלי לעג, הקטנה או הערות על גוף ומשקל של אחרים.</li>
           <li><strong>לא נותנים הוראות רפואיות.</strong> אפשר לשתף חוויה אישית. מינון, הפסקה או החלפת תרופה מחליטים רק עם רופא.</li>
-          <li><strong>לא מוכרים ולא קונים תרופות.</strong> אסור להציע עטים, זריקות או "תחליפים" בלי מרשם.</li>
+          <li><strong>לא מוכרים ולא קונים תרופות.</strong> אסור להציע עטים, תרופות או "תחליפים" בלי מרשם.</li>
           <li><strong>לא מעודדים דיאטה קיצונית.</strong> בלי צום ממושך, הקאות או "אתגרי" ירידה מהירה.</li>
           <li><strong>שומרים על פרטיות.</strong> לא מפרסמים פרטים, תמונות או מידע רפואי של אחרים.</li>
           <li><strong>מידע אמין בלבד.</strong> בלי שמועות ו"תרופות פלא". כשמשתפים מידע, מציינים מקור.</li>
@@ -571,7 +571,7 @@
       <article class="card reminder">
         <h2>תזכורות ביומן</h2>
         <p class="muted small-text">אירוע קבוע ביומן של הטלפון. היומן מתריע גם כשהאפליקציה סגורה.</p>
-        <button class="btn outline" type="button" data-action="cal-shot">תזכורת לזריקה</button>
+        <button class="btn outline" type="button" data-action="cal-shot">תזכורת לטיפול</button>
         <p class="muted small-text" data-cal-shot-text></p>
         <button class="btn outline" type="button" data-action="cal-weight">תזכורת לשקילה</button>
         <p class="muted small-text" data-cal-weight-text></p>
@@ -618,7 +618,7 @@
 
       <article class="card danger-zone">
         <h2>מחיקת כל הנתונים</h2>
-        <p class="muted small-text">מוחק את כל הזריקות, המשקל וההגדרות מהטלפון. אי אפשר לבטל. מומלץ לגבות לפני.</p>
+        <p class="muted small-text">מוחק את כל הטיפולים, המשקל וההגדרות מהטלפון. אי אפשר לבטל. מומלץ לגבות לפני.</p>
         <button class="btn danger" type="button" data-action="reset" data-f="מחקי הכל והתחילי מחדש">מחק הכל והתחל מחדש</button>
       </article>
 
@@ -657,6 +657,6 @@
     </form>
   </template>
 
-  <script src="app.js?v=42"></script>
+  <script src="app.js?v=43"></script>
 </body>
 </html>

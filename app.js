@@ -2,7 +2,7 @@
 'use strict';
 
 // ---------- שמירת נתונים (על המכשיר בלבד) ----------
-const APP_VERSION = '42';
+const APP_VERSION = '43';
 // כתובת לקבלת דיווחים על תוכן מסוכן. אפשר להחליף לכתובת ייעודית (למשל support@shotiv.co.il).
 const REPORT_EMAIL = 'uyossi6127@gmail.com';
 const STORAGE_KEY = 'shotiv.v1';
@@ -287,7 +287,7 @@ function renderCatchup(data) {
         <label><input type="radio" name="shot${i}" value="yes"><span>כן</span></label>
         <label><input type="radio" name="shot${i}" value="no"><span>לא</span></label>
         <label><input type="radio" name="shot${i}" value="unsure"><span>לא זוכר</span></label></div>`;
-      row.querySelector('legend').textContent = `${g('הזרקת', 'הזרקת')} ב${relativeDay(d)}?`;
+      row.querySelector('legend').textContent = `${g('קיבלת', 'קיבלת')} את הטיפול ב${relativeDay(d)}?`;
       if (GENDER === 'female') row.querySelector('input[value=unsure] + span').textContent = 'לא זוכרת';
       row.dataset.date = d.toISOString();
       list.appendChild(row);
@@ -352,7 +352,7 @@ function renderCatchup(data) {
     const q = form.question.value.trim();
     if (q) { fresh.questions = fresh.questions || []; fresh.questions.push({ id: Date.now() + 1, date: new Date().toISOString(), text: q, done: false }); }
     saveData(fresh);
-    toast(addedShots === 1 ? 'הסיכום נשמר, ונוספה זריקה אחת' : addedShots > 1 ? `הסיכום נשמר, ונוספו ${addedShots} זריקות` : 'הסיכום נשמר. ממשיכים מהיום 👍');
+    toast(addedShots === 1 ? 'הסיכום נשמר, ונוסף טיפול אחד' : addedShots > 1 ? `הסיכום נשמר, ונוספו ${addedShots} טיפולים` : 'הסיכום נשמר. ממשיכים מהיום 👍');
     location.hash = '#journal';
   });
 }
@@ -522,7 +522,7 @@ function renderHome(data) {
   if (!data.shots.length) {
     const hint = $('[data-first-hint]');
     hint.hidden = false;
-    hint.textContent = g('הכול מוכן. אחרי הזריקה הראשונה, רשום אותה כאן ונתחיל לעקוב יחד.', 'הכול מוכן. אחרי הזריקה הראשונה, רשמי אותה כאן ונתחיל לעקוב יחד.');
+    hint.textContent = g('הכול מוכן. אחרי הטיפול הראשון, רשום אותו כאן ונתחיל לעקוב יחד.', 'הכול מוכן. אחרי הטיפול הראשון, רשמי אותו כאן ונתחיל לעקוב יחד.');
   }
   const gap = journalGap(data);
   if (gap) {
@@ -547,14 +547,14 @@ function renderHome(data) {
   if (lastShot) {
     const lastEl = $('[data-last-shot]');
     lastEl.hidden = false;
-    lastEl.textContent = `הזריקה האחרונה: ${relativeDay(lastShot.date)}${lastShot.site ? ' · ' + lastShot.site : ''}`;
+    lastEl.textContent = `הטיפול האחרון: ${relativeDay(lastShot.date)}${lastShot.site ? ' · ' + lastShot.site : ''}`;
   }
   const loggedToday = lastShot && daysUntil(lastShot.date) === 0;
   if (loggedToday) {
     // כבר נרשמה זריקה היום: לא מאפשרים רישום כפול, אבל מאפשרים לבטל טעות.
     logBtn.textContent = 'ביטול הרישום של היום';
     logBtn.addEventListener('click', () => {
-      if (!window.confirm('לבטל את הזריקה שנרשמה היום?')) return;
+      if (!window.confirm('לבטל את הטיפול שנרשם היום?')) return;
       data.shots.pop();
       saveData(data);
       toast('הרישום בוטל');
@@ -606,7 +606,7 @@ function motivation(data, pct) {
   if (pct >= 100) return 'הגעת ליעד 🎉 עכשיו שומרים עליו.';
   if (pct >= 50) return 'עברת את חצי הדרך. ממשיכים באותו קצב.';
   if (!data.shots.length) return '';
-  const count = data.shots.length === 1 ? 'הזריקה הראשונה מאחוריך' : `${data.shots.length} זריקות מאחוריך`;
+  const count = data.shots.length === 1 ? 'הטיפול הראשון מאחוריך' : `${data.shots.length} טיפולים מאחוריך`;
   return `${count}. כל שבוע מקרב אותך ליעד.`;
 }
 
@@ -692,15 +692,15 @@ function renderLog(data) {
     const date = when === 'today' ? new Date() : new Date(dateInput.value + 'T12:00:00');
 
     if (isNaN(date)) return showError(errorEl, g('בחר תאריך.', 'בחרי תאריך.'));
-    if (daysUntil(date) > 0) return showError(errorEl, 'אי אפשר לרשום זריקה בתאריך עתידי.');
+    if (daysUntil(date) > 0) return showError(errorEl, 'אי אפשר לרשום טיפול בתאריך עתידי.');
     if (data.shots.some((s) => daysUntil(s.date, date) === 0)) {
-      return showError(errorEl, 'כבר נרשמה זריקה בתאריך הזה.');
+      return showError(errorEl, 'כבר נרשם טיפול בתאריך הזה.');
     }
 
     data.shots.push({ date: date.toISOString(), dose: profile.dose, site: form.elements.site.value });
     data.shots.sort((a, b) => new Date(a.date) - new Date(b.date));
     saveData(data);
-    toast('הזריקה נרשמה');
+    toast('הטיפול נרשם');
     location.hash = '#home';
   });
 }
@@ -731,7 +731,7 @@ function renderHistory(data) {
   }
 
   const n = data.shots.length;
-  $('[data-history-summary]').textContent = n === 1 ? 'נרשמה זריקה אחת.' : `נרשמו ${n} זריקות.`;
+  $('[data-history-summary]').textContent = n === 1 ? 'נרשם טיפול אחד.' : `נרשמו ${n} טיפולים.`;
 
   [...data.shots].reverse().forEach((shot) => {
     const d = new Date(shot.date);
@@ -1063,7 +1063,7 @@ function renderSettings(data) {
 
   // תזכורות ביומן
   $('[data-cal-shot-text]').textContent = `כל יום ${DAY_NAMES[data.profile.shotDay]} בשעה ${data.profile.shotTime}`;
-  $('[data-cal-weight-text]').textContent = `כל יום ${DAY_NAMES[weighReminderDate(data).getDay()]} בשעה 08:00, בבוקר שאחרי הזריקה`;
+  $('[data-cal-weight-text]').textContent = `כל יום ${DAY_NAMES[weighReminderDate(data).getDay()]} בשעה 08:00, בבוקר שאחרי הטיפול`;
   $('[data-action="cal-shot"]').addEventListener('click', () => downloadCalendar(data));
   $('[data-action="cal-weight"]').addEventListener('click', () => downloadWeighCalendar(data));
 
@@ -1123,7 +1123,7 @@ function renderSettings(data) {
       restored.weights = Array.isArray(restored.weights) ? restored.weights : [];
       if (!restored.account && data.account) restored.account = data.account;
       const n = restored.shots.length;
-      const msg = `לשחזר גיבוי מ-${new Date(parsed.exportedAt).toLocaleDateString('he-IL')} עם ${n} זריקות? הנתונים הנוכחיים יוחלפו.`;
+      const msg = `לשחזר גיבוי מ-${new Date(parsed.exportedAt).toLocaleDateString('he-IL')} עם ${n} טיפולים? הנתונים הנוכחיים יוחלפו.`;
       if (!window.confirm(msg)) return;
       saveData(restored);
       toast('הנתונים שוחזרו');
@@ -1231,8 +1231,8 @@ function downloadCalendar(data) {
   downloadIcs('shotiv-shot-reminder.ics', {
     uid: 'shotiv-shot',
     start: icsStamp(nextWeekday(profile.shotDay), hh, mm),
-    summary: `זריקת ${profile.med} – Shotiv`,
-    description: g('זמן לזריקה השבועית. אחרי הזריקה רשום אותה באפליקציה.', 'זמן לזריקה השבועית. אחרי הזריקה רשמי אותה באפליקציה.'),
+    summary: `טיפול ${profile.med} – Shotiv`,
+    description: g('זמן לטיפול השבועי. אחרי הטיפול רשום אותו באפליקציה.', 'זמן לטיפול השבועי. אחרי הטיפול רשמי אותו באפליקציה.'),
   });
 }
 

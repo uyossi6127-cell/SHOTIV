@@ -1,7 +1,7 @@
 {
   "name": "Shotiv",
   "short_name": "Shotiv",
-  "description": "מעקב זריקות, משקל ותופעות לוואי למטופלי תרופות הרזיה",
+  "description": "מעקב טיפולים, משקל ותופעות לוואי למטופלי תרופות הרזיה",
   "lang": "he",
   "dir": "rtl",
   "start_url": "./",
