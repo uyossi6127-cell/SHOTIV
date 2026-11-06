@@ -2,7 +2,7 @@
 'use strict';
 
 // ---------- שמירת נתונים (על המכשיר בלבד) ----------
-const APP_VERSION = '38';
+const APP_VERSION = '39';
 // כתובת לקבלת דיווחים על תוכן מסוכן. אפשר להחליף לכתובת ייעודית (למשל support@shotiv.co.il).
 const REPORT_EMAIL = 'uyossi6127@gmail.com';
 const STORAGE_KEY = 'shotiv.v1';
@@ -75,7 +75,38 @@ function mount(templateId) {
 
 
 // ---------- יומן אישי (הרגשה, תופעות לוואי, שאלות לרופא) ----------
-const MOODS = { 5: ['😄', 'טוב מאוד'], 4: ['🙂', 'טוב'], 3: ['😐', 'ככה ככה'], 2: ['😕', 'קשה'], 1: ['😣', 'קשה מאוד'] };
+const MOODS = { 5: ['', 'טוב מאוד'], 4: ['', 'טוב'], 3: ['', 'ככה ככה'], 2: ['', 'קשה'], 1: ['', 'קשה מאוד'] };
+const MOOD_COLORS = { 1: '#D93A4A', 2: '#F07B3F', 3: '#E8A82E', 4: '#5FB85A', 5: '#159A6E' };
+function miniMeter(v) {
+  const wrap = document.createElement('span');
+  wrap.className = 'mini-meter';
+  for (let i = 1; i <= 5; i++) {
+    const b = document.createElement('i');
+    b.style.height = `${6 + i * 4}px`;
+    if (i <= v) b.style.background = MOOD_COLORS[v];
+    wrap.appendChild(b);
+  }
+  return wrap;
+}
+function drawMoodTrend(svg, entries) {
+  const pts = entries.slice(0, 14).reverse();
+  const W = 320, H = 110, padX = 14, top = 12, bottom = 18;
+  const x = (i) => (pts.length === 1 ? W / 2 : W - padX - (i * (W - 2 * padX)) / (pts.length - 1)); // RTL: הכי ישן מימין
+  const y = (m) => top + ((5 - m) * (H - top - bottom)) / 4;
+  const ns = 'http://www.w3.org/2000/svg';
+  const el = (tag, attrs) => { const n = document.createElementNS(ns, tag); Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v)); return n; };
+  svg.replaceChildren();
+  const defs = el('defs', {});
+  const lg = el('linearGradient', { id: 'mt-grad', x1: '0', y1: '0', x2: '0', y2: '1' });
+  [[0, '#159A6E'], [.5, '#E8A82E'], [1, '#D93A4A']].forEach(([o, c]) => lg.appendChild(el('stop', { offset: o, 'stop-color': c })));
+  defs.appendChild(lg); svg.appendChild(defs);
+  for (let m = 1; m <= 5; m++) svg.appendChild(el('line', { x1: padX, x2: W - padX, y1: y(m), y2: y(m), stroke: '#E6E3EF', 'stroke-width': 1 }));
+  if (pts.length > 1) {
+    const d = pts.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(p.mood).toFixed(1)}`).join(' ');
+    svg.appendChild(el('path', { d, fill: 'none', stroke: 'url(#mt-grad)', 'stroke-width': 3.5, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }));
+  }
+  pts.forEach((p, i) => svg.appendChild(el('circle', { cx: x(i), cy: y(p.mood), r: 6, fill: MOOD_COLORS[p.mood], stroke: '#FFFFFF', 'stroke-width': 2.5 })));
+}
 const dayKey = (d) => { const x = new Date(d); return `${x.getFullYear()}-${x.getMonth() + 1}-${x.getDate()}`; };
 
 function journalToday(data) {
@@ -172,12 +203,17 @@ function renderJournal(data) {
   if (entries.length) {
     $('[data-entries-card]').hidden = false;
     $('[data-effects-summary]').textContent = effectsSummary(data.journal);
+    if (entries.length >= 2) {
+      $('[data-mood-trend]').hidden = false;
+      $('[data-trend-range]').textContent = `${entries.length > 14 ? 14 : entries.length} רישומים אחרונים`;
+      drawMoodTrend($('[data-trend-svg]'), entries);
+    }
     const ul = $('[data-entries]');
     entries.forEach((en) => {
       const li = document.createElement('li');
       const [emoji, label] = MOODS[en.mood] || ['', ''];
-      li.innerHTML = '<span class="e-emoji"></span><div><strong></strong><p class="muted small-text"></p><p class="e-note"></p></div>';
-      li.querySelector('.e-emoji').textContent = emoji;
+      li.innerHTML = '<span class="e-meter"></span><div><strong></strong><p class="muted small-text"></p><p class="e-note"></p></div>';
+      li.querySelector('.e-meter').appendChild(miniMeter(en.mood));
       li.querySelector('strong').textContent = `${relativeDay(en.date)} · ${label}`;
       li.querySelector('.muted').textContent = en.effects && en.effects.length ? en.effects.join(' · ') : 'בלי תופעות לוואי';
       const noteEl = li.querySelector('.e-note');
@@ -350,7 +386,7 @@ function renderHome(data) {
   const jStatus = $('[data-journal-status]');
   if (jt) {
     const [emoji, label] = MOODS[jt.mood];
-    jStatus.textContent = `היום רשמת: ${emoji} ${label}${jt.effects && jt.effects.length ? ' · ' + jt.effects.join(', ') : ''}`;
+    jStatus.textContent = `היום רשמת: ${label}${jt.effects && jt.effects.length ? ' · ' + jt.effects.join(', ') : ''}`;
     const sel = $(`[data-quick-moods] a[href$="mood=${jt.mood}"]`);
     if (sel) sel.classList.add('on');
   } else {

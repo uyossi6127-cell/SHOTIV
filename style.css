@@ -650,3 +650,34 @@ html.theme-male .wordmark .wm-b {
   border-radius: 50%; background: var(--accent-soft); border: 2px solid transparent; }
 .quick-moods a.on { border-color: var(--accent); background: #FFFFFF; }
 .small-link { font-size: 17px; font-weight: 700; color: var(--accent); }
+
+/* ---------- מד הרגשה (במקום אימוג'י) ---------- */
+.meter { --c1: #D93A4A; --c2: #F07B3F; --c3: #E8A82E; --c4: #5FB85A; --c5: #159A6E; }
+.moods.meter { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; align-items: end; }
+.moods.meter .mood span {
+  background: transparent; border: 0; padding: 6px 2px 4px; gap: 8px; justify-content: flex-end; min-height: 108px;
+}
+.meter .bar { display: block; width: 100%; max-width: 46px; border-radius: 10px 10px 6px 6px;
+  background: var(--c); opacity: .28; transition: opacity .2s, transform .2s, box-shadow .2s; }
+.meter .m1 { --c: var(--c1); } .meter .m2 { --c: var(--c2); } .meter .m3 { --c: var(--c3); }
+.meter .m4 { --c: var(--c4); } .meter .m5 { --c: var(--c5); }
+.meter .m1 .bar { height: 24px; } .meter .m2 .bar { height: 38px; } .meter .m3 .bar { height: 52px; }
+.meter .m4 .bar { height: 66px; } .meter .m5 .bar { height: 80px; }
+.meter em { font-style: normal; font-size: 15px; font-weight: 600; color: var(--muted, #6B6880); white-space: nowrap; }
+.moods.meter .mood input:checked + span { box-shadow: none; background: transparent; }
+.moods.meter .mood input:checked + span .bar { opacity: 1; transform: scaleY(1.06); box-shadow: 0 8px 16px -8px var(--c); }
+.moods.meter .mood input:checked + span em { color: var(--c); font-weight: 800; }
+.moods.meter:has(input:checked) .mood input:not(:checked) + span .bar { opacity: .18; }
+.quick-moods.meter { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; align-items: end; margin: 8px 0; }
+.quick-moods.meter a { width: auto; height: auto; border-radius: 0; background: transparent; border: 0; font-size: inherit;
+  display: flex; flex-direction: column; align-items: center; gap: 6px; text-decoration: none; }
+.quick-moods.meter .m1 .bar { height: 18px; } .quick-moods.meter .m2 .bar { height: 28px; } .quick-moods.meter .m3 .bar { height: 38px; }
+.quick-moods.meter .m4 .bar { height: 48px; } .quick-moods.meter .m5 .bar { height: 58px; }
+.quick-moods.meter em { font-size: 13px; }
+.quick-moods.meter a.on .bar { opacity: 1; box-shadow: 0 8px 16px -8px var(--c); }
+.quick-moods.meter a.on em { color: var(--c); font-weight: 800; }
+.quick-moods.meter:has(a.on) a:not(.on) .bar { opacity: .18; }
+.mini-meter { display: inline-flex; align-items: flex-end; gap: 3px; height: 28px; padding-top: 2px; }
+.mini-meter i { display: block; width: 6px; border-radius: 3px; background: #DAD7E5; }
+.e-meter { flex: none; padding-top: 2px; }
+.mood-trend { margin: 6px 0 4px; padding: 12px; border-radius: 16px; background: #FFFFFF; border: 1px solid #ECE9F4; }

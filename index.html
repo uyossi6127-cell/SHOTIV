@@ -15,7 +15,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@100..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=38">
+  <link rel="stylesheet" href="style.css?v=39">
 </head>
 <body>
   <!-- מסך פתיחה מונפש -->
@@ -187,12 +187,12 @@
           <h2>איך הרגשת היום?</h2>
           <a class="small-link" href="#journal">יומן</a>
         </div>
-        <div class="quick-moods" data-quick-moods>
-          <a href="#journal?mood=5" aria-label="טוב מאוד">😄</a>
-          <a href="#journal?mood=4" aria-label="טוב">🙂</a>
-          <a href="#journal?mood=3" aria-label="ככה ככה">😐</a>
-          <a href="#journal?mood=2" aria-label="קשה">😕</a>
-          <a href="#journal?mood=1" aria-label="קשה מאוד">😣</a>
+        <div class="quick-moods meter" data-quick-moods>
+          <a class="m1" href="#journal?mood=1" aria-label="קשה מאוד"><i class="bar"></i><em>קשה מאוד</em></a>
+          <a class="m2" href="#journal?mood=2" aria-label="קשה"><i class="bar"></i><em>קשה</em></a>
+          <a class="m3" href="#journal?mood=3" aria-label="ככה ככה"><i class="bar"></i><em>ככה ככה</em></a>
+          <a class="m4" href="#journal?mood=4" aria-label="טוב"><i class="bar"></i><em>טוב</em></a>
+          <a class="m5" href="#journal?mood=5" aria-label="טוב מאוד"><i class="bar"></i><em>טוב מאוד</em></a>
         </div>
         <p class="muted small-text" data-journal-status></p>
       </article>
@@ -332,12 +332,12 @@
 
       <form class="card stack" id="journal-form" novalidate>
         <h2 data-journal-title>איך הרגשת היום?</h2>
-        <div class="moods" role="radiogroup" aria-label="הרגשה">
-          <label class="mood"><input type="radio" name="mood" value="5"><span><b>😄</b>טוב מאוד</span></label>
-          <label class="mood"><input type="radio" name="mood" value="4"><span><b>🙂</b>טוב</span></label>
-          <label class="mood"><input type="radio" name="mood" value="3"><span><b>😐</b>ככה ככה</span></label>
-          <label class="mood"><input type="radio" name="mood" value="2"><span><b>😕</b>קשה</span></label>
-          <label class="mood"><input type="radio" name="mood" value="1"><span><b>😣</b>קשה מאוד</span></label>
+        <div class="moods meter" role="radiogroup" aria-label="הרגשה">
+          <label class="mood m1"><input type="radio" name="mood" value="1"><span><i class="bar"></i><em>קשה מאוד</em></span></label>
+          <label class="mood m2"><input type="radio" name="mood" value="2"><span><i class="bar"></i><em>קשה</em></span></label>
+          <label class="mood m3"><input type="radio" name="mood" value="3"><span><i class="bar"></i><em>ככה ככה</em></span></label>
+          <label class="mood m4"><input type="radio" name="mood" value="4"><span><i class="bar"></i><em>טוב</em></span></label>
+          <label class="mood m5"><input type="radio" name="mood" value="5"><span><i class="bar"></i><em>טוב מאוד</em></span></label>
         </div>
 
         <h3>תופעות לוואי היום</h3>
@@ -385,6 +385,10 @@
 
       <article class="card" data-entries-card hidden>
         <h2>מה רשמתי לאחרונה</h2>
+        <div class="mood-trend" data-mood-trend hidden>
+          <div class="row-between"><strong>מגמת הרגשה</strong><span class="muted small-text" data-trend-range></span></div>
+          <svg viewBox="0 0 320 110" width="100%" height="110" data-trend-svg aria-hidden="true"></svg>
+        </div>
         <p class="muted small-text" data-effects-summary></p>
         <ul class="entry-list" data-entries></ul>
       </article>
@@ -591,6 +595,6 @@
     </form>
   </template>
 
-  <script src="app.js?v=38"></script>
+  <script src="app.js?v=39"></script>
 </body>
 </html>
