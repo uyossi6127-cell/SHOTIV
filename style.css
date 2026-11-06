@@ -455,9 +455,10 @@ html.text-large #app { zoom: 1.15; }
 
 /* ערכת צבעים לפי מגדר: אישה = זהב ורוד, גבר = פנינה */
 html.theme-female {
-  --accent: #A8525E;          /* גוון עמוק של הזהב הוורוד לטקסט וכפתורים (ניגודיות טובה) */
-  --accent-deep: #6E2F3A;
-  --accent-soft: #FBE3E6;
+  --accent: #C23A5A;          /* זהב ורוד חי ועמוק לטקסט ומסגרות */
+  --accent-deep: #7A1A33;
+  --accent-soft: #FDE2E8;
+  --blend-deep: linear-gradient(120deg, #EC5F7C 0%, #D9405F 50%, #B42A4C 100%);
 }
 /* הכרטיס הראשי בזהב ורוד בהיר ומבריק, לפי דוגמת הצבע */
 html.theme-female .next-shot::after,
@@ -469,9 +470,10 @@ html.theme-female .feedback.up.g-female { background: linear-gradient(115deg, #F
 html.theme-female .feedback.up.g-female .feedback-icon { background: linear-gradient(135deg, #C46F7B, #A8525E); }
 
 html.theme-male {
-  --accent: #1F6FAE;          /* כחול פנינה חי לטקסט וכפתורים (ניגודיות טובה) */
-  --accent-deep: #134A7A;
-  --accent-soft: #E1F1FB;
+  --accent: #0B6BD6;          /* כחול פנינה חי ועמוק לטקסט ומסגרות */
+  --accent-deep: #0A3F80;
+  --accent-soft: #E0EFFF;
+  --blend-deep: linear-gradient(120deg, #3D9EF5 0%, #1A7FE8 50%, #0860CC 100%);
 }
 /* הכרטיס הראשי בכחול פנינה מבריק, לפי דוגמת הפנינים */
 .version { text-align: center; }
@@ -549,3 +551,40 @@ html .field select:focus-visible { outline-color: #6F6E9E; }
 .next-shot .last-shot { color: #241F45; }
 .progress-fill { background: var(--blend-deep); }
 .card.progress-card { border-top: 5px solid transparent; background: linear-gradient(#FFFFFF, #FFFFFF) padding-box, var(--blend-deep) border-box; }
+
+/* ---------- אחרי בחירת מגדר: כל האפליקציה בצבע המגדר, חי וחד ---------- */
+/* אישה: זהב ורוד */
+html.theme-female body { background: linear-gradient(170deg, #FFF0F3 0%, #FFE6EC 100%) fixed; }
+html.theme-female .next-shot {
+  background: linear-gradient(115deg,
+    #E8798B 0%, #F7A8B4 14%, #FFDCE2 26%, #F49AAA 40%,
+    #FCC6CF 54%, #FFE6EA 64%, #F28C9E 80%, #E0607A 100%);
+  color: #4A0F22;
+  box-shadow: 0 16px 30px -14px rgba(217, 64, 95, .55);
+}
+html.theme-female .next-shot .label-light { color: #7A1A33; }
+html.theme-female .next-shot .last-shot { color: #5C1428; }
+html.theme-female .wordmark,
+html.theme-female .wordmark .wm-b {
+  background: linear-gradient(90deg, #B42A4C 0%, #E0506E 55%, #F28C9E 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
+
+/* גבר: כחול פנינה */
+html.theme-male body { background: linear-gradient(170deg, #EEF7FF 0%, #E0EFFF 100%) fixed; }
+html.theme-male .next-shot {
+  background: linear-gradient(115deg,
+    #3D9EF2 0%, #86C9FF 16%, #E8F6FF 27%, #7CC2FF 39%,
+    #4FAAF7 52%, #CDEAFF 64%, #6BB9FB 78%, #1E84E8 100%);
+  color: #06264D;
+  box-shadow: 0 16px 30px -14px rgba(26, 127, 232, .6);
+}
+html.theme-male .next-shot .label-light { color: #0A3F80; }
+html.theme-male .next-shot .last-shot { color: #062B57; }
+html.theme-male .wordmark,
+html.theme-male .wordmark .wm-b {
+  background: linear-gradient(90deg, #0860CC 0%, #1A7FE8 55%, #5DB3FA 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+}
