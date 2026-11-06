@@ -2,7 +2,7 @@
 'use strict';
 
 // ---------- שמירת נתונים (על המכשיר בלבד) ----------
-const APP_VERSION = '30';
+const APP_VERSION = '31';
 const STORAGE_KEY = 'shotiv.v1';
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DAY_NAMES = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
@@ -609,7 +609,7 @@ function showFeedback(data, justSaved) {
   if (!justSaved) return;
   if (kind === 'down') {
     box.classList.add('celebrate');
-    const colors = ['#0E8A62', '#5B3FD9', '#E8572E', '#E3AFA3', '#1F6FD1'];
+    const colors = ['#0E8A62', '#EDA8AE', '#7DC0E8', '#E3939A', '#1F6FAE'];
     for (let i = 0; i < 14; i++) {
       const sp = document.createElement('span');
       sp.className = 'spark';
@@ -907,7 +907,7 @@ function applyTheme(gender) {
   root.classList.toggle('theme-female', gender === 'female');
   root.classList.toggle('theme-male', gender === 'male');
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', THEME_COLORS[gender] || '#5B3FD9');
+  if (meta) meta.setAttribute('content', THEME_COLORS[gender] || '#A8525E');
 }
 
 function applyTextSize() {
