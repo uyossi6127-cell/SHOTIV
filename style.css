@@ -683,9 +683,11 @@ html.theme-male .wordmark .wm-b {
 .mood-trend { margin: 6px 0 4px; padding: 12px; border-radius: 16px; background: #FFFFFF; border: 1px solid #ECE9F4; }
 
 /* ---------- סיכום תקופה ---------- */
-.catchup-card { display: grid; gap: 4px; padding: 16px 18px; border-radius: 20px; text-decoration: none;
-  background: linear-gradient(120deg, #FFF6E5, #FFFFFF); border: 2px solid #F2B33D; color: #5A3600; font-size: 17px; }
-.catchup-card strong { font-size: 20px; color: #3F2600; }
+.catchup-card { display: grid; gap: 6px; padding: 18px 20px; border-radius: 22px; text-decoration: none;
+  background: linear-gradient(125deg, #D9F5E8 0%, #EEFBF4 55%, #FFFFFF 100%); border: 2px solid #3DBE8B;
+  color: #0B5A3F; font-size: 17px; box-shadow: 0 12px 24px -16px rgba(21, 154, 110, .55); }
+.catchup-card strong { font-size: 20px; line-height: 1.35; color: #064A33; }
+.catchup-card span { font-weight: 600; color: #159A6E; }
 .seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; }
 .seg input { position: absolute; opacity: 0; pointer-events: none; }
 .seg span { display: block; text-align: center; padding: 10px 4px; border-radius: 12px; background: #FFFFFF;

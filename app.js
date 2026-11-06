@@ -2,7 +2,7 @@
 'use strict';
 
 // ---------- שמירת נתונים (על המכשיר בלבד) ----------
-const APP_VERSION = '40';
+const APP_VERSION = '41';
 // כתובת לקבלת דיווחים על תוכן מסוכן. אפשר להחליף לכתובת ייעודית (למשל support@shotiv.co.il).
 const REPORT_EMAIL = 'uyossi6127@gmail.com';
 const STORAGE_KEY = 'shotiv.v1';
@@ -273,7 +273,7 @@ function renderCatchup(data) {
   const days = gap.tooLong ? 30 : gap.days;
   $('[data-catchup-intro]').textContent = gap.tooLong
     ? `עברו ${gap.days} ימים. נסכם את 30 הימים האחרונים (${shortDate(from)} עד ${shortDate(gap.to)}), ומהיום ממשיכים כרגיל.`
-    : `${days} ימים בלי עדכון (${shortDate(from)} עד ${shortDate(gap.to)}). זה קורה. ${g('ספר', 'ספרי')} בקצרה איך היו.`;
+    : `טוב שבאת! עברו ${days} ימים מאז העדכון האחרון (${shortDate(from)} עד ${shortDate(gap.to)}). ${g('ספר', 'ספרי')} בקצרה איך היו.`;
 
   // זריקות שלא נרשמו
   const missed = missedShotDays(data, from, gap.to);
@@ -519,9 +519,7 @@ function renderHome(data) {
   const gap = journalGap(data);
   if (gap) {
     $('[data-catchup-card]').hidden = false;
-    $('[data-catchup-title]').textContent = gap.tooLong
-      ? `${g('לא היית', 'לא היית')} פה ${gap.days} ימים. ${g('ברוך השב', 'ברוכה השבה')} 🙂`
-      : `${gap.days} ימים בלי עדכון. זה קורה 🙂 איך היו הימים האלה?`;
+    $('[data-catchup-title]').textContent = `טוב שבאת 👋 ${g('בוא', 'בואי')} נעדכן איך היה מאז העדכון האחרון`;
   }
   const jt = journalToday(data);
   const jStatus = $('[data-journal-status]');
