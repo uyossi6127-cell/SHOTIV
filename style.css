@@ -458,29 +458,13 @@ html.theme-female {
   --accent: #A8525E;          /* גוון עמוק של הזהב הוורוד לטקסט וכפתורים (ניגודיות טובה) */
   --accent-deep: #6E2F3A;
   --accent-soft: #FBE3E6;
-  --ground: #FFF8F8;
 }
 /* הכרטיס הראשי בזהב ורוד בהיר ומבריק, לפי דוגמת הצבע */
-html.theme-female .next-shot {
-  background: linear-gradient(115deg,
-    #EDA8AE 0%, #F4BEC3 14%, #FBD7DA 24%, #FDE3E7 30%, #F4BEC3 42%,
-    #F7C4C8 55%, #FDDDE1 66%, #F2B8BE 80%, #E3939A 100%);
-  color: #5E2531;
-  border: 1px solid #EFC2C6;
-  box-shadow: 0 12px 26px -16px rgba(168, 82, 94, .6);
-}
-html.theme-female .next-shot .label-light { opacity: 1; color: #7A3644; }
-html.theme-female .next-shot .btn.light { background: linear-gradient(135deg, #B35C68, #9E4A57); color: #FFFFFF; }
-html.theme-female .next-shot .last-shot { color: #6E2F3A; }
-html.theme-female .btn.primary { background: linear-gradient(135deg, #B35C68 0%, #A8525E 50%, #934450 100%); }
 html.theme-female .next-shot::after,
 html.theme-male .next-shot::after {
   content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
   background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, .35) 45%, transparent 60%);
 }
-html.theme-female .next-shot, html.theme-male .next-shot { position: relative; overflow: hidden; }
-html.theme-female .wordmark { color: #A8525E; }
-html.theme-female .wordmark .wm-b { color: #E3939A; }
 html.theme-female .feedback.up.g-female { background: linear-gradient(115deg, #FDE3E7, #F7C4C8 60%, #F2B8BE); color: #5E2531; border-color: #EDA8AE; }
 html.theme-female .feedback.up.g-female .feedback-icon { background: linear-gradient(135deg, #C46F7B, #A8525E); }
 
@@ -488,23 +472,8 @@ html.theme-male {
   --accent: #1F6FAE;          /* כחול פנינה חי לטקסט וכפתורים (ניגודיות טובה) */
   --accent-deep: #134A7A;
   --accent-soft: #E1F1FB;
-  --ground: #F4F9FD;
 }
-html.theme-male .btn.primary { background: linear-gradient(135deg, #2F86C4 0%, #1F6FAE 55%, #155489 100%); }
 /* הכרטיס הראשי בכחול פנינה מבריק, לפי דוגמת הפנינים */
-html.theme-male .next-shot {
-  background: linear-gradient(115deg,
-    #7DC0E8 0%, #A9D8F0 16%, #EAF7FE 27%, #A9D8F0 38%,
-    #86C6EC 52%, #D6EEFB 64%, #8FCBEE 78%, #5AA9DC 100%);
-  color: #0F2E4A;
-  border: 1px solid #9FD0EE;
-  box-shadow: 0 14px 28px -14px rgba(31, 111, 174, .65);
-}
-html.theme-male .next-shot .label-light { opacity: 1; color: #134A7A; }
-html.theme-male .next-shot .btn.light { background: linear-gradient(135deg, #2F86C4, #1F6FAE); color: #FFFFFF; }
-html.theme-male .next-shot .last-shot { color: #0F2E4A; }
-html.theme-male .wordmark { color: #1F6FAE; }
-html.theme-male .wordmark .wm-b { color: #4FA3DA; }
 .version { text-align: center; }
 
 .weigh-nudge {
@@ -545,18 +514,38 @@ html.theme-male .wordmark .wm-b { color: #4FA3DA; }
 /* ---------- שילוב צבעי הדמויות (לפני בחירת מגדר: הרשמה ומסך הטיפול) ---------- */
 .btn.primary { background: var(--blend-deep); box-shadow: 0 10px 22px -14px rgba(95, 115, 159, .8); }
 .toast { background: var(--blend-deep); }
-html:not(.theme-female):not(.theme-male) body {
+html body {
   background: linear-gradient(170deg, #FFF4F5 0%, #F8F2F8 45%, #EEF6FC 100%) fixed;
 }
-html:not(.theme-female):not(.theme-male) .wordmark,
-html:not(.theme-female):not(.theme-male) .wordmark .wm-b {
+html .wordmark,
+html .wordmark .wm-b {
   background: linear-gradient(90deg, #B35C68 0%, #C9707D 30%, #6F6E9E 62%, #1F6FAE 100%);
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
 }
-html:not(.theme-female):not(.theme-male) .choice input:checked + span {
+html .choice input:checked + span {
   border-color: transparent;
   background: linear-gradient(var(--accent-soft), var(--accent-soft)) padding-box, var(--blend-deep) border-box;
 }
-html:not(.theme-female):not(.theme-male) .field input:focus-visible,
-html:not(.theme-female):not(.theme-male) .field select:focus-visible { outline-color: #6F6E9E; }
+html .field input:focus-visible,
+html .field select:focus-visible { outline-color: #6F6E9E; }
+
+/* הכרטיס הראשי: זהב ורוד ופנינה כחולה מבריקים, לכולם */
+.next-shot {
+  position: relative; overflow: hidden;
+  background: linear-gradient(115deg,
+    #EDA8AE 0%, #F4BEC3 14%, #FDE3E7 26%, #F2C6D2 38%,
+    #D9D3EC 50%, #C3E3F5 62%, #EAF7FE 72%, #A9D8F0 84%, #7DC0E8 100%);
+  color: #2A2F4A;
+  border: 1px solid #E3CFE0;
+  box-shadow: 0 14px 28px -16px rgba(95, 115, 159, .6);
+}
+.next-shot::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, .35) 45%, transparent 60%);
+}
+.next-shot .label-light { opacity: 1; color: #4A3A5E; }
+.next-shot .btn.light { background: var(--blend-deep); color: #FFFFFF; }
+.next-shot .last-shot { color: #3A3550; }
+.progress-fill { background: var(--blend-deep); }
+.card.progress-card { border-top: 5px solid transparent; background: linear-gradient(#FFFFFF, #FFFFFF) padding-box, var(--blend-deep) border-box; }
