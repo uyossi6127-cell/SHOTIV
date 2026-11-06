@@ -2,7 +2,7 @@
 'use strict';
 
 // ---------- שמירת נתונים (על המכשיר בלבד) ----------
-const APP_VERSION = '43';
+const APP_VERSION = '44';
 // כתובת לקבלת דיווחים על תוכן מסוכן. אפשר להחליף לכתובת ייעודית (למשל support@shotiv.co.il).
 const REPORT_EMAIL = 'uyossi6127@gmail.com';
 const STORAGE_KEY = 'shotiv.v1';
@@ -1249,14 +1249,17 @@ function downloadWeighCalendar(data) {
   });
 }
 
-const THEME_COLORS = { female: '#D9405F', male: '#1A7FE8' };
+// צבע שורת הסטטוס: תואם לרקע העליון של האפליקציה בכל מגדר (במסך הפתיחה: הוורוד של הפתיחה)
+const THEME_COLORS = { female: '#FFF0F3', male: '#EEF7FF' };
+let themeColor = '#FFEAF1';
 function applyTheme(gender) {
   GENDER = gender || null;
   const root = document.documentElement;
   root.classList.toggle('theme-female', gender === 'female');
   root.classList.toggle('theme-male', gender === 'male');
   const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', THEME_COLORS[gender] || '#E8336F');
+  themeColor = THEME_COLORS[gender] || '#FFEAF1';
+  if (meta && !document.getElementById('splash')) meta.setAttribute('content', themeColor);
 }
 
 function applyTextSize() {
@@ -1290,7 +1293,11 @@ render();
 // מסך הפתיחה: נעלם לבד בסוף האנימציה, או בנגיעה.
 const splash = document.getElementById('splash');
 if (splash) {
-  const removeSplash = () => splash.remove();
+  const removeSplash = () => {
+    splash.remove();
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', themeColor);
+  };
   splash.addEventListener('animationend', (e) => { if (e.animationName === 'splash-out') removeSplash(); });
   splash.addEventListener('click', removeSplash);
   setTimeout(removeSplash, 5200);
