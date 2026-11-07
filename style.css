@@ -707,3 +707,32 @@ html.theme-male .wordmark .wm-b {
 .motivation::before { content: ""; flex: none; width: 8px; height: 8px; margin-top: 9px; border-radius: 50%; background: var(--accent); }
 .first-hint { margin: 2px 0 0; font-size: 17px; line-height: 1.45; font-weight: 600; opacity: .9; }
 .next-shot > * { position: relative; z-index: 1; }
+
+/* ---------- 4 שלבים ---------- */
+.stages-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 6px; }
+.seg-s { height: 12px; border-radius: 6px; background: #E6E3EF; overflow: hidden; }
+.seg-s i { display: block; height: 100%; width: 0; background: var(--blend-deep); border-radius: 6px; transition: width .6s ease; }
+.seg-s.now { box-shadow: 0 0 0 2px var(--accent-soft), 0 0 0 3px var(--accent); }
+.stage-line { display: flex; justify-content: space-between; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); }
+.stage-line strong { font-size: 18px; }
+.stage-go { flex: none; font-weight: 700; color: var(--accent); font-size: 16px; }
+.journey-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+.stage-card { display: flex; gap: 14px; padding: 18px 16px; border-radius: 22px; background: #FFFFFF; border: 2px solid #ECE9F4; }
+.stage-card.now { border-color: var(--accent); box-shadow: 0 14px 28px -18px var(--accent); }
+.stage-card.next { opacity: .7; }
+.stage-num { flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 20px; font-weight: 800; background: #ECE9F4; color: #6B6880; }
+.stage-card.now .stage-num { background: var(--blend-deep); color: #FFFFFF; }
+.stage-card.done .stage-num { background: #159A6E; color: #FFFFFF; }
+.stage-body { flex: 1; min-width: 0; }
+.stage-body h2 { margin: 0; font-size: 20px; }
+.stage-badge { font-size: 14px; font-weight: 700; padding: 4px 10px; border-radius: 999px; background: #ECE9F4; color: #6B6880; white-space: nowrap; }
+.stage-card.now .stage-badge { background: var(--accent); color: #FFFFFF; }
+.stage-card.done .stage-badge { background: #DDF3EA; color: #0B6B4C; }
+.stage-range { margin: 4px 0 2px; font-weight: 700; font-size: 17px; direction: rtl; }
+.stage-focus { margin: 0 0 8px; font-size: 16px; }
+.stage-goals { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.goal { display: flex; gap: 10px; align-items: flex-start; font-size: 17px; line-height: 1.4; cursor: pointer; }
+.goal input { width: 24px; height: 24px; flex: none; margin-top: 1px; accent-color: #159A6E; }
+.goal input:checked + span { color: #0B6B4C; }
+.journey-goal h2 { margin: 0 0 6px; }

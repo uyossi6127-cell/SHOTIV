@@ -2,7 +2,7 @@
 'use strict';
 
 // ---------- שמירת נתונים (על המכשיר בלבד) ----------
-const APP_VERSION = '44';
+const APP_VERSION = '45';
 // כתובת לקבלת דיווחים על תוכן מסוכן. אפשר להחליף לכתובת ייעודית (למשל support@shotiv.co.il).
 const REPORT_EMAIL = 'uyossi6127@gmail.com';
 const STORAGE_KEY = 'shotiv.v1';
@@ -357,6 +357,115 @@ function renderCatchup(data) {
   });
 }
 
+
+// ---------- המסע שלי: 4 שלבים עד היעד ----------
+const JOURNEY = [
+  { name: 'יוצאים לדרך', focus: 'מתרגלים לטיפול ובונים שגרה של מעקב.', goals: [
+    { id: 's1a', text: '4 טיפולים רשומים באפליקציה', auto: (d) => d.shots.length >= 4 },
+    { id: 's1b', text: 'שקילה קבועה: 3 שקילות', auto: (d) => d.weights.length >= 3 },
+    { id: 's1c', text: '5 רישומים ביומן האישי', auto: (d) => (d.journal || []).length >= 5 },
+  ] },
+  { name: 'צוברים תאוצה', focus: 'מחזקים הרגלים: שתייה, חלבון ותנועה.', goals: [
+    { id: 's2a', text: '2 עד 3 ליטר נוזלים ביום' },
+    { id: 's2b', text: 'מקור חלבון בכל ארוחה' },
+    { id: 's2c', text: '150 דקות הליכה בשבוע' },
+  ] },
+  { name: 'מתמידים', focus: 'שומרים על השריר, ולא נבהלים מעצירה זמנית במשקל.', goals: [
+    { id: 's3a', text: 'אימון כוח 2 עד 3 פעמים בשבוע' },
+    { id: 's3b', text: 'שאלה אחת לפחות לרופא ביומן', auto: (d) => (d.questions || []).length >= 1 },
+    { id: 's3c', text: 'לזהות מה עוזר לי ביום קשה' },
+  ] },
+  { name: 'מגיעים ליעד', focus: 'הקילוגרמים האחרונים, ומתכננים איך שומרים על היעד.', goals: [
+    { id: 's4a', text: 'לתכנן עם הרופא את שלב השמירה' },
+    { id: 's4b', text: '8 שקילות לאורך הדרך', auto: (d) => d.weights.length >= 8 },
+    { id: 's4c', text: 'לבחור פרס אישי להגעה ליעד' },
+  ] },
+];
+
+// באיזה שלב נמצא משקל מסוים: 0–3, או 4 = הגיע ליעד. null אם אין יעד ירידה.
+function stageForWeight(profile, w) {
+  const loss = profile.startWeight - profile.goalWeight;
+  if (!(loss > 0)) return null;
+  const f = (profile.startWeight - w) / loss;
+  if (f >= 1) return 4;
+  return Math.max(0, Math.min(3, Math.floor(f * 4)));
+}
+function stageThresholds(profile) {
+  const loss = profile.startWeight - profile.goalWeight;
+  return [0, 1, 2, 3, 4].map((k) => Math.round((profile.startWeight - (loss * k) / 4) * 10) / 10);
+}
+function goalDone(data, goal) {
+  if (goal.auto && goal.auto(data)) return true;
+  return !!((data.journeyDone || {})[goal.id]);
+}
+
+function renderStagesBar(root, data) {
+  const p = data.profile;
+  const loss = p.startWeight - p.goalWeight;
+  const f = loss > 0 ? Math.max(0, Math.min(1, (p.startWeight - currentWeight(data)) / loss)) : 0;
+  const segs = root.querySelectorAll('.seg-s');
+  segs.forEach((s, i) => {
+    const part = Math.max(0, Math.min(1, f * 4 - i));
+    s.classList.toggle('done', part >= 1);
+    s.classList.toggle('now', part > 0 && part < 1 || (part === 0 && Math.floor(f * 4) === i && f < 1));
+    requestAnimationFrame(() => { s.querySelector('i').style.width = (part * 100) + '%'; });
+  });
+  return f;
+}
+
+function renderJourney(data) {
+  mount('tpl-journey');
+  window.scrollTo(0, 0);
+  const $ = (sel) => app.querySelector(sel);
+  const p = data.profile;
+  const cur = currentWeight(data);
+  const idx = stageForWeight(p, cur);
+  const th = stageThresholds(p);
+  $('[data-journey-target]').textContent = `${formatKg(p.goalWeight)} ק"ג`;
+  if (idx === null) { $('[data-journey-intro]').textContent = 'כדי לראות את השלבים, צריך משקל יעד נמוך ממשקל ההתחלה (בהגדרות).'; return; }
+  $('[data-journey-intro]').textContent = idx === 4
+    ? 'הגעת ליעד! כל ארבעת השלבים מאחוריך 🎉'
+    : `הדרך מ-${formatKg(p.startWeight)} ל-${formatKg(p.goalWeight)} ק"ג מחולקת ל-4 שלבים. לכל שלב יש מטרות משלו.`;
+  const list = $('[data-journey-list]');
+  JOURNEY.forEach((st, i) => {
+    const status = i < idx ? 'done' : i === idx ? 'now' : 'next';
+    const li = document.createElement('li');
+    li.className = `stage-card ${status}`;
+    li.innerHTML = `<div class="stage-num">${status === 'done' ? '✓' : i + 1}</div>
+      <div class="stage-body">
+        <div class="row-between"><h2></h2><span class="stage-badge"></span></div>
+        <p class="stage-range"></p><p class="stage-focus muted"></p>
+        <ul class="stage-goals"></ul></div>`;
+    li.querySelector('h2').textContent = `שלב ${i + 1}: ${st.name}`;
+    li.querySelector('.stage-badge').textContent = status === 'done' ? 'הושלם' : status === 'now' ? g('אתה כאן', 'את כאן') : 'בהמשך';
+    li.querySelector('.stage-range').textContent = `${formatKg(th[i])} ← ${formatKg(th[i + 1])} ק"ג`;
+    if (status === 'now') {
+      const toNext = Math.max(0, Math.round((cur - th[i + 1]) * 10) / 10);
+      li.querySelector('.stage-range').textContent += ` · עוד ${formatKg(toNext)} ק"ג`;
+    }
+    li.querySelector('.stage-focus').textContent = st.focus;
+    const ul = li.querySelector('.stage-goals');
+    st.goals.forEach((goal) => {
+      const item = document.createElement('li');
+      const done = goalDone(data, goal);
+      item.innerHTML = '<label class="goal"><input type="checkbox"><span></span></label>';
+      const input = item.querySelector('input');
+      input.checked = done;
+      item.querySelector('span').textContent = goal.text + (goal.auto ? ' (מתעדכן לבד)' : '');
+      if (goal.auto || status === 'next') input.disabled = true;
+      input.addEventListener('change', () => {
+        const fresh = loadData();
+        fresh.journeyDone = fresh.journeyDone || {};
+        if (input.checked) fresh.journeyDone[goal.id] = true; else delete fresh.journeyDone[goal.id];
+        saveData(fresh);
+        if (input.checked) toast('כל הכבוד! מטרה הושלמה ✓');
+      });
+      ul.appendChild(item);
+    });
+    list.appendChild(li);
+  });
+}
+
 // ---------- בטיחות ותמיכה ----------
 function renderSafety(data) {
   mount('tpl-safety');
@@ -512,8 +621,20 @@ function renderHome(data) {
   $('[data-lost]').textContent = lost > 0 ? '\u200E−' + formatKg(lost) : '0';
   $('[data-left]').textContent = formatKg(left);
   $('[data-progress-bar]').setAttribute('aria-valuenow', pct);
-  $('[data-progress-text]').textContent = `${pct}% מהדרך ליעד`;
-  requestAnimationFrame(() => { $('[data-progress-fill]').style.width = pct + '%'; });
+  renderStagesBar($('[data-progress-bar]'), data);
+  const sIdx = stageForWeight(profile, now);
+  const th = stageThresholds(profile);
+  if (sIdx === null) {
+    $('[data-stage-name]').textContent = `${pct}% מהדרך ליעד`;
+    $('[data-progress-text]').textContent = '';
+  } else if (sIdx === 4) {
+    $('[data-stage-name]').textContent = 'הגעת ליעד 🎉';
+    $('[data-progress-text]').textContent = 'כל 4 השלבים הושלמו';
+  } else {
+    const toNext = Math.max(0, Math.round((now - th[sIdx + 1]) * 10) / 10);
+    $('[data-stage-name]').textContent = `שלב ${sIdx + 1} מתוך 4: ${JOURNEY[sIdx].name}`;
+    $('[data-progress-text]').textContent = `עוד ${formatKg(toNext)} ק"ג ${sIdx === 3 ? 'ליעד' : 'לשלב הבא'} · ${pct}% מהדרך`;
+  }
 
   const motiv = motivation(data, pct);
   const motivEl = $('[data-motivation]');
@@ -948,6 +1069,17 @@ function showFeedback(data, justSaved) {
     title = 'המשקל יציב מאז השקילה הקודמת';
     text = 'יציבות היא גם התקדמות. ממשיכים בשגרה.';
   }
+  // מעבר שלב: חוגגים בגדול
+  if (justSaved && change < 0) {
+    const sorted = data.weights.slice().sort((a, b) => new Date(a.date) - new Date(b.date));
+    const prevW = sorted.length >= 2 ? sorted[sorted.length - 2].kg : data.profile.startWeight;
+    const before = stageForWeight(data.profile, prevW);
+    const after = stageForWeight(data.profile, currentWeight(data));
+    if (before !== null && after > before) {
+      title = after === 4 ? 'הגעת ליעד! 🏁🎉' : `עברת לשלב ${after + 1}: ${JOURNEY[after].name} 🎉`;
+      text = after === 4 ? 'כל ארבעת השלבים מאחוריך. עכשיו בונים עם הרופא את שלב השמירה.' : `שלב ${before + 1} הושלם. המטרות החדשות מחכות במסך "המסע שלי".`;
+    }
+  }
   box.hidden = false;
   const g = data.profile.gender;
   box.className = `feedback ${kind}${g ? ' g-' + g : ''}`;
@@ -1283,6 +1415,7 @@ function render() {
   if (route === 'safety') return renderSafety(data);
   if (route === 'journal') return renderJournal(data);
   if (route === 'catchup') return renderCatchup(data);
+  if (route === 'journey') return renderJourney(data);
   renderHome(data);
   window.scrollTo(0, 0);
 }

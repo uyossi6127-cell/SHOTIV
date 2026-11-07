@@ -15,7 +15,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@100..900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=44">
+  <link rel="stylesheet" href="style.css?v=45">
 </head>
 <body>
   <!-- מסך פתיחה מונפש -->
@@ -179,10 +179,13 @@
           <div><dt>ירדת</dt><dd class="accent" data-lost></dd></div>
           <div><dt>נשאר</dt><dd data-left></dd></div>
         </dl>
-        <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-progress-bar>
-          <div class="progress-fill" data-progress-fill></div>
+        <div class="stages-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" data-progress-bar>
+          <div class="seg-s"><i></i></div><div class="seg-s"><i></i></div><div class="seg-s"><i></i></div><div class="seg-s"><i></i></div>
         </div>
-        <p class="muted small-text" data-progress-text></p>
+        <a class="stage-line" href="#journey">
+          <span><strong data-stage-name></strong><br><span class="muted small-text" data-progress-text></span></span>
+          <span class="stage-go">המסע שלי ←</span>
+        </a>
         <p class="motivation" data-motivation hidden></p>
         <a class="btn green" href="#weight">עדכון משקל</a>
       </article>
@@ -457,6 +460,22 @@
     </section>
   </template>
 
+  <!-- המסע שלי: 4 שלבים עד היעד -->
+  <template id="tpl-journey">
+    <section class="screen journey">
+      <header class="row-between">
+        <h1>המסע שלי</h1>
+        <a class="btn ghost small" href="#home">חזרה</a>
+      </header>
+      <p class="muted" data-journey-intro></p>
+      <ol class="journey-list" data-journey-list></ol>
+      <article class="card journey-goal">
+        <h2>🏁 היעד: <span data-journey-target></span></h2>
+        <p class="muted">אחרי היעד מתחיל שלב חשוב לא פחות: לשמור עליו. את התוכנית לשלב הזה בונים יחד עם הרופא.</p>
+      </article>
+    </section>
+  </template>
+
   <template id="tpl-safety">
     <section class="screen safety">
       <header class="row-between">
@@ -657,6 +676,6 @@
     </form>
   </template>
 
-  <script src="app.js?v=44"></script>
+  <script src="app.js?v=45"></script>
 </body>
 </html>
