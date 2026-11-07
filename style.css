@@ -736,3 +736,7 @@ html.theme-male .wordmark .wm-b {
 .goal input { width: 24px; height: 24px; flex: none; margin-top: 1px; accent-color: #159A6E; }
 .goal input:checked + span { color: #0B6B4C; }
 .journey-goal h2 { margin: 0 0 6px; }
+
+.stage-expect { margin: 0 0 10px; font-size: 16px; line-height: 1.45; padding: 10px 12px; border-radius: 12px; background: var(--accent-soft); }
+.stage-card.next .stage-expect { background: #F4F3F8; }
+.journey-src { margin: 14px 4px 0; }

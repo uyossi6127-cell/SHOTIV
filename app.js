@@ -2,7 +2,7 @@
 'use strict';
 
 // ---------- שמירת נתונים (על המכשיר בלבד) ----------
-const APP_VERSION = '45';
+const APP_VERSION = '46';
 // כתובת לקבלת דיווחים על תוכן מסוכן. אפשר להחליף לכתובת ייעודית (למשל support@shotiv.co.il).
 const REPORT_EMAIL = 'uyossi6127@gmail.com';
 const STORAGE_KEY = 'shotiv.v1';
@@ -358,59 +358,81 @@ function renderCatchup(data) {
 }
 
 
-// ---------- המסע שלי: 4 שלבים עד היעד ----------
+// ---------- המסע שלי: 4 שלבים לפי מהלך הטיפול (מבוסס על המחקר, docs/07) ----------
+// שלבים 1–2 לפי זמן בטיפול (הסתגלות, העלאת מינון כל 4 שבועות לפי התווית),
+// שלבים 3–4 לפי ההתקדמות במשקל (ירידה במינון יציב, ואז היעד ושמירה).
+const isMounjaro = (p) => /מונג/.test(p.med || '');
 const JOURNEY = [
-  { name: 'יוצאים לדרך', focus: 'מתרגלים לטיפול ובונים שגרה של מעקב.', goals: [
-    { id: 's1a', text: '4 טיפולים רשומים באפליקציה', auto: (d) => d.shots.length >= 4 },
-    { id: 's1b', text: 'שקילה קבועה: 3 שקילות', auto: (d) => d.weights.length >= 3 },
-    { id: 's1c', text: '5 רישומים ביומן האישי', auto: (d) => (d.journal || []).length >= 5 },
-  ] },
-  { name: 'צוברים תאוצה', focus: 'מחזקים הרגלים: שתייה, חלבון ותנועה.', goals: [
-    { id: 's2a', text: '2 עד 3 ליטר נוזלים ביום' },
-    { id: 's2b', text: 'מקור חלבון בכל ארוחה' },
-    { id: 's2c', text: '150 דקות הליכה בשבוע' },
-  ] },
-  { name: 'מתמידים', focus: 'שומרים על השריר, ולא נבהלים מעצירה זמנית במשקל.', goals: [
-    { id: 's3a', text: 'אימון כוח 2 עד 3 פעמים בשבוע' },
-    { id: 's3b', text: 'שאלה אחת לפחות לרופא ביומן', auto: (d) => (d.questions || []).length >= 1 },
-    { id: 's3c', text: 'לזהות מה עוזר לי ביום קשה' },
-  ] },
-  { name: 'מגיעים ליעד', focus: 'הקילוגרמים האחרונים, ומתכננים איך שומרים על היעד.', goals: [
-    { id: 's4a', text: 'לתכנן עם הרופא את שלב השמירה' },
-    { id: 's4b', text: '8 שקילות לאורך הדרך', auto: (d) => d.weights.length >= 8 },
-    { id: 's4c', text: 'לבחור פרס אישי להגעה ליעד' },
-  ] },
+  { name: 'הסתגלות', when: () => 'שבועות 1 עד 4',
+    expect: 'בחילה ושינויים במעיים שכיחים בהתחלה (25% עד 44% מהמטופלים בניסויים). רובם קלים וחולפים.',
+    goals: [
+      { id: 'j1a', text: 'ארוחות קטנות, לאכול לאט ולעצור בשובע' },
+      { id: 'j1b', text: '2 עד 3 ליטר נוזלים ביום' },
+      { id: 'j1c', text: '2 טיפולים רשומים באפליקציה', auto: (d) => d.shots.length >= 2 },
+      { id: 'j1d', text: '3 רישומים ביומן (הרגשה ותופעות)', auto: (d) => (d.journal || []).length >= 3 },
+    ] },
+  { name: 'העלאת מינון', when: (p) => `שבועות 5 עד ${isMounjaro(p) ? 20 : 16} בערך (לפי הרופא)`,
+    expect: 'תופעות הלוואי מתגברות לרוב בשבוע-שבועיים אחרי כל העלאת מינון, ואז נחלשות. את המינון קובע רק הרופא.',
+    goals: [
+      { id: 'j2a', text: 'מקור חלבון בכל ארוחה (שומר על השריר והשיער)' },
+      { id: 'j2b', text: 'הליכה של 10 עד 20 דקות ביום' },
+      { id: 'j2c', text: '8 רישומים ביומן, במיוחד אחרי העלאת מינון', auto: (d) => (d.journal || []).length >= 8 },
+      { id: 'j2d', text: 'אם את משתמשת בגלולות: אמצעי מניעה נוסף ל-4 שבועות אחרי כל העלאת מינון', only: (d) => d.profile.gender === 'female' && isMounjaro(d.profile) },
+    ] },
+  { name: 'ירידה יציבה', when: (p, th) => `עד ${formatKg(th[3])} ק"ג`,
+    expect: 'במינון קבוע תופעות הלוואי פוחתות מאוד (בחילה: מ-36% ל-8% בניסוי SURMOUNT-4). המטרה: לרדת בשומן ולשמור על השריר.',
+    goals: [
+      { id: 'j3a', text: '150 דקות פעילות בשבוע' },
+      { id: 'j3b', text: 'אימון כוח 3 פעמים בשבוע' },
+      { id: 'j3c', text: 'לבדוק עם הרופא ויטמינים ומינרלים (בדיקת דם)' },
+      { id: 'j3d', text: 'שקילה קבועה: 6 שקילות', auto: (d) => d.weights.length >= 6 },
+    ] },
+  { name: 'היעד ושמירה', when: (p, th) => `${formatKg(th[3])} ← ${formatKg(p.goalWeight)} ק"ג, ואחר כך שמירה`,
+    expect: 'עצירות זמניות במשקל טבעיות. מתכננים עם הרופא איך שומרים על היעד, ולא מפסיקים טיפול לבד.',
+    goals: [
+      { id: 'j4a', text: 'לתכנן עם הרופא את שלב השמירה' },
+      { id: 'j4b', text: 'להמשיך חלבון ואימוני כוח גם אחרי היעד' },
+      { id: 'j4c', text: 'שאלה לרופא ביומן לקראת הביקור', auto: (d) => (d.questions || []).length >= 1 },
+    ] },
 ];
 
-// באיזה שלב נמצא משקל מסוים: 0–3, או 4 = הגיע ליעד. null אם אין יעד ירידה.
-function stageForWeight(profile, w) {
-  const loss = profile.startWeight - profile.goalWeight;
-  if (!(loss > 0)) return null;
-  const f = (profile.startWeight - w) / loss;
-  if (f >= 1) return 4;
-  return Math.max(0, Math.min(3, Math.floor(f * 4)));
-}
 function stageThresholds(profile) {
   const loss = profile.startWeight - profile.goalWeight;
   return [0, 1, 2, 3, 4].map((k) => Math.round((profile.startWeight - (loss * k) / 4) * 10) / 10);
+}
+function treatmentStart(data) {
+  const firstShot = data.shots.length ? new Date(data.shots[0].date) : null;
+  const created = new Date(data.profile.createdAt || Date.now());
+  return firstShot && firstShot < created ? firstShot : (firstShot || created);
+}
+// מחזיר את השלב (0–3), האם הגיע ליעד, והתקדמות בתוך השלב (0–1)
+function journeyState(data, weight = currentWeight(data)) {
+  const p = data.profile;
+  const loss = p.startWeight - p.goalWeight;
+  const f = loss > 0 ? Math.max(0, (p.startWeight - weight) / loss) : 0;
+  const days = Math.max(0, Math.floor((Date.now() - treatmentStart(data)) / DAY_MS));
+  const escDays = (isMounjaro(p) ? 20 : 16) * 7;
+  let idx, part;
+  if (loss > 0 && f >= 0.75) { idx = 3; part = Math.min(1, (f - 0.75) / 0.25); }
+  else if (days < 28) { idx = 0; part = days / 28; }
+  else if (days < escDays) { idx = 1; part = (days - 28) / (escDays - 28); }
+  else { idx = 2; part = loss > 0 ? Math.min(1, f / 0.75) : 0; }
+  return { idx, part, reached: loss > 0 && f >= 1, days, week: Math.floor(days / 7) + 1, f };
 }
 function goalDone(data, goal) {
   if (goal.auto && goal.auto(data)) return true;
   return !!((data.journeyDone || {})[goal.id]);
 }
+const stageGoals = (data, st) => st.goals.filter((gl) => !gl.only || gl.only(data));
 
 function renderStagesBar(root, data) {
-  const p = data.profile;
-  const loss = p.startWeight - p.goalWeight;
-  const f = loss > 0 ? Math.max(0, Math.min(1, (p.startWeight - currentWeight(data)) / loss)) : 0;
-  const segs = root.querySelectorAll('.seg-s');
-  segs.forEach((s, i) => {
-    const part = Math.max(0, Math.min(1, f * 4 - i));
-    s.classList.toggle('done', part >= 1);
-    s.classList.toggle('now', part > 0 && part < 1 || (part === 0 && Math.floor(f * 4) === i && f < 1));
+  const js = journeyState(data);
+  root.querySelectorAll('.seg-s').forEach((s, i) => {
+    const part = js.reached ? 1 : i < js.idx ? 1 : i === js.idx ? Math.max(0.06, js.part) : 0;
+    s.classList.toggle('now', i === js.idx && !js.reached);
     requestAnimationFrame(() => { s.querySelector('i').style.width = (part * 100) + '%'; });
   });
-  return f;
+  return js;
 }
 
 function renderJourney(data) {
@@ -418,39 +440,37 @@ function renderJourney(data) {
   window.scrollTo(0, 0);
   const $ = (sel) => app.querySelector(sel);
   const p = data.profile;
-  const cur = currentWeight(data);
-  const idx = stageForWeight(p, cur);
   const th = stageThresholds(p);
+  const js = journeyState(data);
   $('[data-journey-target]').textContent = `${formatKg(p.goalWeight)} ק"ג`;
-  if (idx === null) { $('[data-journey-intro]').textContent = 'כדי לראות את השלבים, צריך משקל יעד נמוך ממשקל ההתחלה (בהגדרות).'; return; }
-  $('[data-journey-intro]').textContent = idx === 4
-    ? 'הגעת ליעד! כל ארבעת השלבים מאחוריך 🎉'
-    : `הדרך מ-${formatKg(p.startWeight)} ל-${formatKg(p.goalWeight)} ק"ג מחולקת ל-4 שלבים. לכל שלב יש מטרות משלו.`;
+  $('[data-journey-intro]').textContent = js.reached
+    ? 'הגעת ליעד! עכשיו השלב החשוב: לשמור עליו 🎉'
+    : `שבוע ${js.week} לטיפול. השלבים בנויים לפי מהלך הטיפול: הסתגלות, העלאת מינון, ירידה במינון יציב, ואז היעד.`;
   const list = $('[data-journey-list]');
   JOURNEY.forEach((st, i) => {
-    const status = i < idx ? 'done' : i === idx ? 'now' : 'next';
+    const status = js.reached || i < js.idx ? 'done' : i === js.idx ? 'now' : 'next';
     const li = document.createElement('li');
     li.className = `stage-card ${status}`;
     li.innerHTML = `<div class="stage-num">${status === 'done' ? '✓' : i + 1}</div>
       <div class="stage-body">
         <div class="row-between"><h2></h2><span class="stage-badge"></span></div>
-        <p class="stage-range"></p><p class="stage-focus muted"></p>
+        <p class="stage-range"></p><p class="stage-expect"></p>
         <ul class="stage-goals"></ul></div>`;
     li.querySelector('h2').textContent = `שלב ${i + 1}: ${st.name}`;
     li.querySelector('.stage-badge').textContent = status === 'done' ? 'הושלם' : status === 'now' ? g('אתה כאן', 'את כאן') : 'בהמשך';
-    li.querySelector('.stage-range').textContent = `${formatKg(th[i])} ← ${formatKg(th[i + 1])} ק"ג`;
-    if (status === 'now') {
-      const toNext = Math.max(0, Math.round((cur - th[i + 1]) * 10) / 10);
-      li.querySelector('.stage-range').textContent += ` · עוד ${formatKg(toNext)} ק"ג`;
+    let range = st.when(p, th);
+    if (status === 'now' && i >= 2 && !js.reached) {
+      const target = i === 2 ? th[3] : p.goalWeight;
+      range += ` · עוד ${formatKg(Math.max(0, Math.round((currentWeight(data) - target) * 10) / 10))} ק"ג`;
     }
-    li.querySelector('.stage-focus').textContent = st.focus;
+    li.querySelector('.stage-range').textContent = range;
+    li.querySelector('.stage-expect').textContent = `מה צפוי: ${st.expect}`;
     const ul = li.querySelector('.stage-goals');
-    st.goals.forEach((goal) => {
+    stageGoals(data, st).forEach((goal) => {
       const item = document.createElement('li');
-      const done = goalDone(data, goal);
       item.innerHTML = '<label class="goal"><input type="checkbox"><span></span></label>';
       const input = item.querySelector('input');
-      input.checked = done;
+      input.checked = goalDone(data, goal);
       item.querySelector('span').textContent = goal.text + (goal.auto ? ' (מתעדכן לבד)' : '');
       if (goal.auto || status === 'next') input.disabled = true;
       input.addEventListener('change', () => {
@@ -464,6 +484,10 @@ function renderJourney(data) {
     });
     list.appendChild(li);
   });
+  const src = document.createElement('p');
+  src.className = 'muted small-text journey-src';
+  src.textContent = 'מבוסס על תוויות התרופות (FDA), ניסויי SURMOUNT ו-STEP, ההמלצה המשותפת של איגודי התזונה וההשמנה (2025) ועלון NHS. לא מחליף ייעוץ רפואי.';
+  list.after(src);
 }
 
 // ---------- בטיחות ותמיכה ----------
@@ -621,20 +645,22 @@ function renderHome(data) {
   $('[data-lost]').textContent = lost > 0 ? '\u200E−' + formatKg(lost) : '0';
   $('[data-left]').textContent = formatKg(left);
   $('[data-progress-bar]').setAttribute('aria-valuenow', pct);
-  renderStagesBar($('[data-progress-bar]'), data);
-  const sIdx = stageForWeight(profile, now);
+  const js = renderStagesBar($('[data-progress-bar]'), data);
   const th = stageThresholds(profile);
-  if (sIdx === null) {
-    $('[data-stage-name]').textContent = `${pct}% מהדרך ליעד`;
-    $('[data-progress-text]').textContent = '';
-  } else if (sIdx === 4) {
-    $('[data-stage-name]').textContent = 'הגעת ליעד 🎉';
-    $('[data-progress-text]').textContent = 'כל 4 השלבים הושלמו';
+  if (js.reached) {
+    $('[data-stage-name]').textContent = 'הגעת ליעד 🎉 עכשיו שומרים עליו';
+    $('[data-progress-text]').textContent = `${pct}% מהדרך`;
   } else {
-    const toNext = Math.max(0, Math.round((now - th[sIdx + 1]) * 10) / 10);
-    $('[data-stage-name]').textContent = `שלב ${sIdx + 1} מתוך 4: ${JOURNEY[sIdx].name}`;
-    $('[data-progress-text]').textContent = `עוד ${formatKg(toNext)} ק"ג ${sIdx === 3 ? 'ליעד' : 'לשלב הבא'} · ${pct}% מהדרך`;
+    $('[data-stage-name]').textContent = `שלב ${js.idx + 1} מתוך 4: ${JOURNEY[js.idx].name}`;
+    const extra = js.idx === 3 ? `עוד ${formatKg(left)} ק"ג ליעד`
+      : js.idx === 2 ? `עוד ${formatKg(Math.max(0, Math.round((now - th[3]) * 10) / 10))} ק"ג לשלב האחרון`
+      : `שבוע ${js.week} לטיפול`;
+    $('[data-progress-text]').textContent = `${extra} · ${pct}% מהדרך`;
   }
+  // מעבר שלב לפי זמן: מודיעים פעם אחת
+  const seen = data.journeySeen ?? js.idx;
+  if (js.idx > seen) toast(`עברת לשלב ${js.idx + 1}: ${JOURNEY[js.idx].name} 🎉`);
+  if (data.journeySeen !== js.idx) { const fr = loadData(); fr.journeySeen = js.idx; saveData(fr); }
 
   const motiv = motivation(data, pct);
   const motivEl = $('[data-motivation]');
@@ -1069,15 +1095,18 @@ function showFeedback(data, justSaved) {
     title = 'המשקל יציב מאז השקילה הקודמת';
     text = 'יציבות היא גם התקדמות. ממשיכים בשגרה.';
   }
-  // מעבר שלב: חוגגים בגדול
+  // מעבר שלב בעקבות השקילה: חוגגים בגדול
   if (justSaved && change < 0) {
     const sorted = data.weights.slice().sort((a, b) => new Date(a.date) - new Date(b.date));
     const prevW = sorted.length >= 2 ? sorted[sorted.length - 2].kg : data.profile.startWeight;
-    const before = stageForWeight(data.profile, prevW);
-    const after = stageForWeight(data.profile, currentWeight(data));
-    if (before !== null && after > before) {
-      title = after === 4 ? 'הגעת ליעד! 🏁🎉' : `עברת לשלב ${after + 1}: ${JOURNEY[after].name} 🎉`;
-      text = after === 4 ? 'כל ארבעת השלבים מאחוריך. עכשיו בונים עם הרופא את שלב השמירה.' : `שלב ${before + 1} הושלם. המטרות החדשות מחכות במסך "המסע שלי".`;
+    const before = journeyState(data, prevW);
+    const after = journeyState(data);
+    if (after.reached && !before.reached) {
+      title = 'הגעת ליעד! 🏁🎉';
+      text = 'עכשיו בונים עם הרופא את שלב השמירה.';
+    } else if (after.idx > before.idx) {
+      title = `עברת לשלב ${after.idx + 1}: ${JOURNEY[after.idx].name} 🎉`;
+      text = 'המטרות החדשות מחכות במסך "המסע שלי".';
     }
   }
   box.hidden = false;
